@@ -24,6 +24,8 @@ class Project(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    
+    
     class Meta:
         ordering = ['-importance', '-status', '-created']
         indexes = [models.Index(
@@ -58,3 +60,39 @@ class Task(models.Model):
 
     def __str__(self):
         return f'Task: {self.name} from {self.project}'
+    
+class AbstractNote(models.Model):
+    message = models.TextField()
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+class ProjectNote(AbstractNote):
+    project = models.ForeignKey(Project,
+                                on_delete=models.CASCADE,
+                                related_name='project_notes')
+    
+    def was_updated(self):
+        created = self.created.replace(second=0, microsecond=0)
+        updated = self.updated.replace(second=0, microsecond=0)
+
+        return created != updated
+    
+    class Meta:
+        ordering = ['-created']
+        indexes = [models.Index(
+            fields=['-created']
+        )]
+
+class TaskNote(AbstractNote):
+    task = models.ForeignKey(Project,
+                                on_delete=models.CASCADE,
+                                related_name='task_notes')
+    class Meta:
+        ordering = ['-created']
+        indexes = [models.Index(
+            fields=['-created']
+        )]
