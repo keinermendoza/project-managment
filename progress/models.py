@@ -1,10 +1,11 @@
 from django.db import models
+from account.models import User
 
 class Project(models.Model):
     class Importance(models.IntegerChoices):
         LOW = (1, 'Low')
         INTERESTIG = (2, 'Interesting')
-        GOOD = (3, 'Good')
+        NORMAL = (3, 'Normal')
         IMPORTANT = (4, 'Importat')
         URGENT = (5, 'Urgent')       
 
@@ -15,10 +16,12 @@ class Project(models.Model):
         GROW = (4, 'Adjusting details')
         IMPLEMENTIG = (5, 'Deploying version 1')
         ITERATING = (6, 'Improving Performance and adding new Features')
+        FINISHED = (7, 'Completed')
+
 
     name = models.CharField(max_length=120)
     description = models.TextField()
-    importance = models.IntegerField(choices=Importance.choices, default=Importance.GOOD)
+    importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
     status = models.IntegerField(choices=Status.choices, default=Status.IDEA)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -33,10 +36,17 @@ class Project(models.Model):
         )]
 
     def __str__(self):
-        return f'Proyect: {self.name}'
+        return self.name
     
 
 class Task(models.Model):
+    class Importance(models.IntegerChoices):
+        LOW = (1, 'Low')
+        INTERESTIG = (2, 'Interesting')
+        NORMAL = (3, 'Normal')
+        IMPORTANT = (4, 'Importat')
+        URGENT = (5, 'Urgent')       
+
     class Status(models.IntegerChoices):
         PENDING = (1, 'Not started yet')
         WORKING = (2, 'Working on it')
@@ -46,6 +56,7 @@ class Task(models.Model):
     name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.PENDING)
+    importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
 
@@ -53,15 +64,16 @@ class Task(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ['-created', '-status',]
+        ordering = ['-created', '-importance', '-status',]
         indexes = [models.Index(
-            fields=['-created', '-status']
+            fields=['-created', '-importance', '-status']
         )]
 
     def __str__(self):
-        return f'Task: {self.name} from {self.project}'
+        return f'{self.name} from Proyect: {self.project}'
     
 class AbstractNote(models.Model):
+    """for use as base of ProjectNote and TaskNote"""
     message = models.TextField()
     
     created = models.DateTimeField(auto_now_add=True)
@@ -70,12 +82,20 @@ class AbstractNote(models.Model):
     class Meta:
         abstract = True
 
+    def __str__(self):
+        return f"writed on {self.created}"
+
 class ProjectNote(AbstractNote):
     project = models.ForeignKey(Project,
                                 on_delete=models.CASCADE,
                                 related_name='project_notes')
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name="project_notes",
+                             blank=True)
     
     def was_updated(self):
+        """for show the updated date only when it was updated"""
         created = self.created.replace(second=0, microsecond=0)
         updated = self.updated.replace(second=0, microsecond=0)
 
@@ -88,9 +108,14 @@ class ProjectNote(AbstractNote):
         )]
 
 class TaskNote(AbstractNote):
-    task = models.ForeignKey(Project,
+    task = models.ForeignKey(Task,
                                 on_delete=models.CASCADE,
                                 related_name='task_notes')
+    user = models.ForeignKey(User,
+                             on_delete=models.CASCADE,
+                             related_name="task_notes",
+                             blank=True)
+
     class Meta:
         ordering = ['-created']
         indexes = [models.Index(

@@ -1,7 +1,12 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+
 {% block title %}
 Project {{ project.id }} {{ block.super }}
 {% endblock %}
+
+
+{% block extrastyle %}<link rel="stylesheet" href="{% static 'tailwind/tail.css' %}">{% endblock %}
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -14,9 +19,11 @@ Project {{ project.id }} {{ block.super }}
 {% endblock %}
 
 {% block content %}
+
 <div class="module">
-    <h1>{{ project.name }}</h1>
-    <p>{{project.description}}</p>
+    <!-- INFO PROJECT -->
+    <h1 class="text-2xl font-bold text-black ">{{ project.name }}</h1>
+    <p class="mb-3">{{project.description}}</p>
     
     <table>
         <tr>
@@ -38,12 +45,13 @@ Project {{ project.id }} {{ block.super }}
         
     </table>
 
+    <!-- PROJECT COMMENTS -->
     {% with project_notes=project.project_notes.count %}
         {% if project_notes > 0 %}
-            <p style="margin-top:20px">You have {{project_notes}} message{{project_notes | pluralize}}</p>
+            <p class="mt-5 text-lg font-semibold">You have {{project_notes}} message{{project_notes | pluralize}}</p>
             
             {% for note in project.project_notes.all %}
-            <div style="margin-block:20px">
+            <div class="bg-slate-300 p-2 my-2 rounded">
                 <p>Message {{ forloop.counter }}. <em>{{note.created}}</em></p>
                 <p>
                     {{note.message}}
@@ -59,9 +67,10 @@ Project {{ project.id }} {{ block.super }}
 
 </div>
 
+<!-- tasks of the project -->
 <div class="module">
     <h2>Tasks related to the Project</h2>
-    <table style="width:100%">
+    <table class="w-full">
         <thead>
             <tr>
                 <th>Name</th>
@@ -81,13 +90,26 @@ Project {{ project.id }} {{ block.super }}
                 <td class="num">{{ task.created }}</td>
                 <td class="num">{{ task.updated }}</td>
             </tr>
-            {% endfor %}
 
-{% comment %} 
-            <tr class="total">
-                <td colspan="3">Total</td>
-                <td class="num">${{ order.get_total_cost }}</td>
-            </tr> {% endcomment %}
+                <!-- comments of the task -->
+                {% if task.task_notes.exists %}
+                    {% for comment in task.task_notes.all %}
+                    <tr>
+                        <td colspan="5" class="bg-yellow-200">
+                            <span class="text-sm mr-2">#{{ forloop.counter }} Msg:</span>
+                            <span class="mr-2 italic">{{ comment.created |date:"d/M/Y g:iA"}}.</span>
+                            <span class="mr-2">{{ comment.message }}</span> 
+                            <a href="{% url 'admin:progress_task_change' task.id %}">Add Comment</button>
+                                
+                            
+                                
+                        </td>
+                    </tr>                        
+                    {% endfor %}
+                {% endif %}
+            
+
+            {% endfor %}
 
 
         </tbody>

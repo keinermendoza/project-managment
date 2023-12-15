@@ -9,16 +9,31 @@ def project_view(obj):
     return mark_safe(f'<a href="{url}">View</a>')
 
 class ProjectNoteAdmin(admin.StackedInline):
+    """for see the projectNote form inside the ProjectAdmin"""
+
     model = ProjectNote
     extra = 1 
 
-class TaskAdmin(admin.StackedInline):
+class TaskStackedAdmin(admin.StackedInline):
+    """for see the task form inside the ProjectAdmin"""
+    
     model = Task
-    extra = 1 
+    extra = 1
 
+class TaskNoteStackedAdmin(admin.StackedInline):
+    """for see the taskNoteStacked form inside the TaskAdmin"""
+
+    model = TaskNote
+    extra = 1
+
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    inlines = [TaskNoteStackedAdmin]
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', 'importance', 'status', 'created', project_view]
     search_fields = ['name', 'description']
-    inlines = [ProjectNoteAdmin, TaskAdmin]
+    inlines = [ProjectNoteAdmin, TaskStackedAdmin]
