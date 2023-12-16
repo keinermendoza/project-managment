@@ -1,7 +1,14 @@
 {% extends 'progress/base.html' %}
 
-
+<!-- lg:grid-col-350 -->
 {% block main %}
     <h1 class="text-2xl text-blue-900">Proyect Progress Managment</h1>
+
+    <section class="grid sm:grid-col-350 gap-3">
+    {% for project in projects  %}
+        {% include 'progress/snippets/project.html' with project=project %}
+    {% endfor %}
+    </section>
+    
 {% endblock main %}
     

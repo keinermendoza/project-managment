@@ -7,7 +7,15 @@ from .models import Project
 
 
 def home(request):
-    return render(request, 'progress/home.html')
+    projects = Project.objects.filter(public=True)
+    
+    # get the private projects of this user
+    if request.user.is_authenticated:
+        user_projects = Project.objects.filter(user=request.user)
+        if user_projects is not None:
+            projects += user_projects
+
+    return render(request, 'progress/home.html', {'projects':projects})
 
 
 @staff_member_required

@@ -23,10 +23,11 @@ class Project(models.Model):
     description = models.TextField()
     importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
     status = models.IntegerField(choices=Status.choices, default=Status.IDEA)
+    image = models.FileField(upload_to='projects', null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-
+    public = models.BooleanField(default=True)
     
     
     class Meta:
