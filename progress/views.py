@@ -13,7 +13,7 @@ def home(request):
     if request.user.is_authenticated:
         user_projects = Project.objects.filter(user=request.user)
         if user_projects is not None:
-            projects += user_projects
+            projects = projects | user_projects
 
     return render(request, 'progress/home.html', {'projects':projects})
 

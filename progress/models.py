@@ -24,6 +24,7 @@ class Project(models.Model):
     importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
     status = models.IntegerField(choices=Status.choices, default=Status.IDEA)
     image = models.FileField(upload_to='projects', null=True)
+    user = models.ForeignKey(User, related_name="projects", on_delete=models.CASCADE, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

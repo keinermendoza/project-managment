@@ -2,8 +2,11 @@
 module.exports = {
   content: ["./**/templates/**/*.html", "./**/templates/**/snipets/*.html"],
   theme: {
-    extend: {},
+    extend: {
+      screens: {
+      'nano': '380px'
+    },
   },
   plugins: [],
 }
-
+}
