@@ -83,7 +83,7 @@ class AbstractNote(models.Model):
         abstract = True
 
     def __str__(self):
-        return f"writed on {self.created}"
+        return f'writed on {self.created.strftime("%d/%m/%Y %I:%M%p")}'
 
 class ProjectNote(AbstractNote):
     project = models.ForeignKey(Project,
@@ -102,9 +102,9 @@ class ProjectNote(AbstractNote):
         return created != updated
     
     class Meta:
-        ordering = ['-created']
+        ordering = ['created']
         indexes = [models.Index(
-            fields=['-created']
+            fields=['created']
         )]
 
 class TaskNote(AbstractNote):
@@ -117,7 +117,7 @@ class TaskNote(AbstractNote):
                              blank=True)
 
     class Meta:
-        ordering = ['-created']
+        ordering = ['created']
         indexes = [models.Index(
-            fields=['-created']
+            fields=['created']
         )]

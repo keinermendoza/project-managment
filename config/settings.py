@@ -119,6 +119,8 @@ LENGUAGES = [
 ]
 
 TIME_ZONE = 'America/Manaus'
+# DATE_FORMAT = 'd-m-Y'
+
 
 USE_I18N = True
 

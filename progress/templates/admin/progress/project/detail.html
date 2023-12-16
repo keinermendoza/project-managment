@@ -78,28 +78,39 @@ Project {{ project.id }} {{ block.super }}
                 <th>Status</th>
                 <th>Created</th>
                 <th>Updated</th>
+                <th>Action</th>
             </tr>
         </thead>
         <tbody>
             {% for task in project.tasks.all %}
-            <tr class="row{% cycle "1" "2" %}">
+            <tr >
                 <td>{{ task.name }}</td>
                 <td>{{ task.description }}</td>
 
                 <td class="num">{{ task.get_status_display }}</td>
                 <td class="num">{{ task.created }}</td>
                 <td class="num">{{ task.updated }}</td>
+                <td>
+                    <a class="p-1 ms-auto bg-green-700 hover:bg-green-950  visited:text-white text-white rounded" href="{% url 'admin:progress_task_change' task.id %}">Edit Task / Notes</button>
+                </td>
+
             </tr>
 
                 <!-- comments of the task -->
                 {% if task.task_notes.exists %}
                     {% for comment in task.task_notes.all %}
-                    <tr>
-                        <td colspan="5" class="bg-yellow-200">
+                    <tr >
+                        <td colspan="6" class="bg-yellow-200">
                             <span class="text-sm mr-2">#{{ forloop.counter }} Msg:</span>
+                            {% if comment.user == request.user %}
+                                <span class="text-sm mr-2 font-semibold p-1 bg-slate-400 rounded">{{ comment.user.username }}</span>
+
+                            {% else %}
+                                <span class="text-sm mr-2 font-semibold p-1 text-white bg-sky-700 rounded">Me</span>
+                            {% endif %}
+
                             <span class="mr-2 italic">{{ comment.created |date:"d/M/Y g:iA"}}.</span>
                             <span class="mr-2">{{ comment.message }}</span> 
-                            <a href="{% url 'admin:progress_task_change' task.id %}">Add Comment</button>
                                 
                             
                                 
