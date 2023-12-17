@@ -4,5 +4,10 @@ from . import views
 app_name = 'progress'
 urlpatterns = [
     path('progress/admin/project/<int:project_id>/', views.admin_project_view, name="admin_project_view"),
-    path('', views.home, name='home'),
+    path('projects/all/', views.projects_all, name="projects_all"),
+    path('projects/public/', views.projects_public, name="projects_public"),
+    path('projects/private/', views.projects_private, name="projects_private"),
+    path('project/<int:project_id>/', views.project_detail, name="project_detail"),
+
+    path('', views.home, name='projects_home'),
 ]
