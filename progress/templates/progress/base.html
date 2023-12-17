@@ -16,7 +16,8 @@
 <body class="h-screen mx-auto bg-slate-200">
 
     <header class="w-full  sticky top-0 z-10 bg-sky-700">
-        <div class="max-w-[2000px] mx-auto flex justify-between content-center p-2 lg:p-5">
+        <div class="max-w-[2000px] mx-auto flex justify-between content-center p-2 lg:p-5"
+            x-data="{openMobile : false}">
 
             <!-- brand -->
             <h1 class="grid place-content-center font-semibold text-xl">Progress</h1>
@@ -56,19 +57,27 @@
             </nav>
 
             <!-- mobile btn visible until md -->
+            <!-- ALPINE handle mobile menu using object openMobile  -->
             <button class="md:hidden p-2 rounded bg-sky-400 hover:bg-sky-500"
-                @click="openMobile = ! openMobile">
+                @click="openMobile = ! openMobile"
+                @click.outside="openMobile = false"
+                x-on:resize.window="openMobile = false">
 
                 <svg xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
                     <path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/>
                 </svg>
             </button>
 
+            {% comment %} d-none md:hidden {% endcomment %}
             <!-- mobile menu cover all the page when active -->
             <section id="mobile-menu"
-                class="d-none md:hidden  absolute top-68 bg-rose-600 dark:bg-indigo-600 w-full text-5xl 
+                class="absolute top-[250px] bg-rose-600 dark:bg-indigo-600 w-full text-5xl 
                         flex-col justify-center origin-top animate-open-menu"
-                @click.outside="openMobile = false">
+                
+                :class="{'flex' : openMobile, 'd-none' : !openMobile}"
+                
+                >
+                {% comment %} @click.outside="openMobile = false" {% endcomment %}
             
                 <nav aria-label="mobile" 
                     class="flex flex-col min-h-screen items-center py-8">
