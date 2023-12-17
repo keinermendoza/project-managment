@@ -6,7 +6,15 @@ from django.contrib.auth.decorators import login_required
 from .models import Project
 
 def home(request):
-   return render(request, 'progress/home.html', {'active_section':'home'})
+
+    if request.htmx:
+        template_name = 'progress/snippets/project_list.html'
+        title = True
+    else:
+        template_name = 'progress/project_list.html'
+        title = False
+
+    return render(request, template_name, {'active_section':'home', 'title':title})
 
 def projects_all(request):
     """return the public projects and the private if the 
@@ -20,15 +28,26 @@ def projects_all(request):
         if user_projects is not None:
             projects = projects | user_projects
 
-    return render(request, 'progress/project_list.html', {'projects':projects,
-                                                  'active_section':'all'})
+    if request.htmx:
+        template_name = 'progress/snippets/project_list.html'
+        title = True
+    else:
+        template_name = 'progress/project_list.html'
+        title = False
+
+    return render(request, template_name, {'projects':projects, 'title':title, 'active_section':'all'})
 
 def projects_public(request):
     """return only the public projects"""
     projects = Project.objects.filter(public=True)
 
-    return render(request, 'progress/project_list.html', {'projects':projects,
-                                                  'active_section':'public'})
+    if request.htmx:
+        template_name = 'progress/snippets/project_list.html'
+        title = True
+    else:
+        template_name = 'progress/project_list.html'
+        title = False
+    return render(request, template_name, {'projects':projects, 'active_section':'public', 'title':title})
 
 @login_required
 def projects_private(request):
@@ -36,8 +55,15 @@ def projects_private(request):
     if request.user.is_authenticated:
         projects = Project.objects.filter(user=request.user)
 
-    return render(request, 'progress/project_list.html', {'projects':projects,
-                                                  'active_section':'private'})
+    if request.htmx:
+        template_name = 'progress/snippets/project_list.html'
+        title = True
+
+    else:
+        template_name = 'progress/project_list.html'
+        title = False
+
+    return render(request, template_name, {'projects':projects, 'active_section':'private', 'title':title})
 
 def project_detail(request, project_id):
     pass

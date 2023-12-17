@@ -3,6 +3,6 @@
 {% block title %}{{active_section | capfirst}} Projects{% endblock title %}
 
 {% block main %}
-    {% include "progress/snippets/project_list_partial.html" with projects=projects active_section=active_section %} 
+    {% include "progress/snippets/project_list.html" with projects=projects active_section=active_section %} 
 {% endblock main %}
     

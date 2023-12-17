@@ -49,6 +49,9 @@ MIDDLEWARE = [
     
     # for avilitate translations
     # 'django.middleware.locale.LocaleMiddleware',
+
+    # htmx-middleware
+    "django_htmx.middleware.HtmxMiddleware",
     
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

@@ -6,7 +6,9 @@
 <a class="{% if mb_2 %}mb-2{% endif %} p-2 rounded  border-solid border-2 bg-slate-100 shadow-sm hover:bg-slate-300"
     :class="{'bg-yellow-500  border-yellow-300' : $store.section.isActive('{{section_name}}')}"
     @click="$store.section.updateActive('{{section_name}}')"
-    href="{% url url_section_name %}">
+    href="{% url url_section_name %}"
+    hx-target="#main"
+    hx-push-url="true">
         
     {% if section_name == 'home'  %}
 
@@ -34,7 +36,7 @@
 
         
     {% endif %}
-    <h2 class="inline-block">{% if strprojects %}Projects{% endif %} {{section_name |capfirst }}</h2>
+    <h2 class="inline-block">{{section_name |capfirst }} {% if strprojects %}Projects{% endif %}</h2>
 </a>
 
 {% endwith %}

@@ -1,11 +1,8 @@
 {% extends 'progress/base.html' %}
 
 {% block title %}Home{% endblock title %}
-<!-- lg:grid-col-350 -->
-{% block main %}
-    
-    <h1 class="ms-1 mb-3 text-4xl text-blue-900 font-semibold">Wellcome</h1>
 
-    
+{% block main %}
+    {% include "progress/snippets/home.html" %}    
 {% endblock main %}
     
