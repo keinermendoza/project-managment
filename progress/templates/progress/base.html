@@ -49,6 +49,8 @@
                 <a class="d-none md:flex border-solid border-2 lg:hidden p-2 rounded bg-sky-400"
                 :class="{'bg-yellow-500  border-yellow-300' : $store.section.isActive('home')}"
                 @click="$store.section.updateActive('home')"
+                hx-target="#main"
+                hx-push-url="true"
                 href="{% url 'progress:projects_home' %}"
                 >Home</a>
 
@@ -98,7 +100,7 @@
 
                 <h2 class="text-2xl font-semibold text-slate-100  my-2">Sections</h2>
                 
-                {% include "progress/snippets/btn_section.html" with section_name="home" mb_2=True strprojects=True %}
+                {% include "progress/snippets/btn_section.html" with section_name="home" mb_2=True %}
                 {% include "progress/snippets/btn_section.html" with section_name="all" mb_2=True strprojects=True %}
                 {% include "progress/snippets/btn_section.html" with section_name="public" mb_2=True strprojects=True %}
                 {% include "progress/snippets/btn_section.html" with section_name="private" mb_2=False strprojects=True %}

@@ -8,10 +8,10 @@ from .models import Project
 def home(request):
 
     if request.htmx:
-        template_name = 'progress/snippets/project_list.html'
+        template_name = 'progress/snippets/home.html'
         title = True
     else:
-        template_name = 'progress/project_list.html'
+        template_name = 'progress/home.html'
         title = False
 
     return render(request, template_name, {'active_section':'home', 'title':title})
