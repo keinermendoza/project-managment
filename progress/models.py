@@ -1,5 +1,10 @@
+from datetime import timedelta
 from django.db import models
+from django.utils import timezone as tz
+from django.core.exceptions import ValidationError
+
 from account.models import User
+
 
 class Project(models.Model):
     class Importance(models.IntegerChoices):
@@ -54,16 +59,111 @@ class Task(models.Model):
         WORKING = (2, 'Working on it')
         WAITING = (3, 'Waiting feed back')
         FINISHED = (4, 'Completed')
-    
+
+    class UnitTime(models.TextChoices):
+        HOUR = ('H', 'Hour')
+        DAY = ('D', 'Day')
+
     name = models.CharField(max_length=120)
     description = models.TextField(blank=True)
     status = models.IntegerField(choices=Status.choices, default=Status.PENDING)
     importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
+    estimated_time = models.PositiveIntegerField(null=True)
+    esitmated_unit_time = models.CharField(max_length=1, choices=UnitTime.choices,
+                                           default=UnitTime.HOUR)
+    
+    started = models.DateTimeField(null=True)
+    finalized = models.DateTimeField(null=True)
 
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    
+    __original_status = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__original_status = self.status
+
+    def save(self, *args, **kwargs):
+        
+        # new taks
+        if not self.id:
+            # marked as worked
+            if self.status == self.Status.WORKING:
+                self.started = tz.now()
+        
+            # marked as finalized
+            if self.status == self.Status.FINISHED:
+                self.started = tz.now()
+                self.finalized = tz.now() + timedelta(seconds=1)
+
+        # Task registred previously
+        else:
+            # if it was stoped
+            if self.__original_status == self.Status.WAITING\
+                or self.__original_status == self.Status.PENDING:
+                
+                print("dentro del else")
+                if self.status == self.Status.WORKING:
+                    print("working")
+                    self.started = tz.now()
+                    self.finalized = None
+
+                elif self.status == self.Status.FINISHED:
+                    print("finished")
+                    
+                    self.started = tz.now()
+                    self.finalized = tz.now() + timedelta(seconds=1)
+
+            elif self.__original_status == self.Status.WORKING:
+                if self.status == self.Status.FINISHED:
+                    self.finalized = tz.now()
+
+
+
+        super(Task, self).save(*args, **kwargs)
+        self.__original_status = self.status
+
+
+    # def start_task(self):
+    #     """writes the task start time 
+    #     returns the current server time if write None otherwise"""
+        
+    #     if not self.started:
+    #         self.started = tz.now()
+    #         self.save()
+    #         return self.started
+    #     return None
+
+
+    # def finish_task(self):
+    #     """writes the task finish
+    #     returns the current server time if write None otherwise"""
+
+    #     if self.started:
+    #         self.finalized = tz.now()
+    #         self.save()
+    #         return self.finalized
+    #     return None
+
+    @property
+    def get_time_to_finish(self):
+        if not self.started or not self.estimated_time or not self.estimated_unit_time:
+            print('first')
+            return None
+        if self.started and self.finalized:
+            print('second')
+            return None
+        if self.stimated_unit_time == self.UnitTime.HOUR:
+            estimated_finish = tz.now() + timedelta(hours=self.estimated_time)
+        else:
+            estimated_finish = tz.now() + timedelta(days=self.estimated_time)
+        print('final')
+
+        estimated_finish = self.started + estimated_finish 
+        return estimated_finish.replace(second=0, microsecond=0)
 
     class Meta:
         ordering = ['-created', '-importance', '-status',]
@@ -80,6 +180,7 @@ class AbstractNote(models.Model):
     
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+    public = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
