@@ -87,82 +87,65 @@ class Task(models.Model):
         self.__original_status = self.status
 
     def save(self, *args, **kwargs):
-        
-        # new taks
-        if not self.id:
-            # marked as worked
+        """updates the started and finalized dateTime
+        in relation to previous a new status"""
+
+        # new task with status WORKING
+        if not self.id and self.status == self.Status.WORKING:
+            self.started = tz.now()
+
+        # old task marked previously as FINISHED and changed
+        elif self.__original_status == self.Status.FINISHED\
+            and self.status != self.Status.FINISHED:
+
+            # set both to None. except if new status is WORKING 
+            self.started = None
+            self.finalized = None
+            if self.status == Task.Status.WORKING: 
+                self.started = tz.now()
+
+
+        # new or old task marked previously as NOT WORKING. 
+        elif self.__original_status != self.Status.WORKING: 
+            
             if self.status == self.Status.WORKING:
                 self.started = tz.now()
-        
-            # marked as finalized
-            if self.status == self.Status.FINISHED:
+
+            elif self.status == self.Status.FINISHED:
                 self.started = tz.now()
-                self.finalized = tz.now() + timedelta(seconds=1)
+                self.finalized = tz.now()
 
-        # Task registred previously
+        # old task marked previously as WORKING. 
         else:
-            # if it was stoped
-            if self.__original_status == self.Status.WAITING\
-                or self.__original_status == self.Status.PENDING:
-                
-                print("dentro del else")
-                if self.status == self.Status.WORKING:
-                    print("working")
-                    self.started = tz.now()
-                    self.finalized = None
+            # if new status is FINISHED 
+            if self.status == self.Status.FINISHED:
+                self.finalized = tz.now()
 
-                elif self.status == self.Status.FINISHED:
-                    print("finished")
-                    
-                    self.started = tz.now()
-                    self.finalized = tz.now() + timedelta(seconds=1)
+            # if new status is PENDING or WAITING
+            elif self.status == self.Status.FINISHED\
+                or self.status == self.Status.WAITING:
 
-            elif self.__original_status == self.Status.WORKING:
-                if self.status == self.Status.FINISHED:
-                    self.finalized = tz.now()
-
-
+                self.started = None
+                self.finalized = None
 
         super(Task, self).save(*args, **kwargs)
         self.__original_status = self.status
 
 
-    # def start_task(self):
-    #     """writes the task start time 
-    #     returns the current server time if write None otherwise"""
-        
-    #     if not self.started:
-    #         self.started = tz.now()
-    #         self.save()
-    #         return self.started
-    #     return None
-
-
-    # def finish_task(self):
-    #     """writes the task finish
-    #     returns the current server time if write None otherwise"""
-
-    #     if self.started:
-    #         self.finalized = tz.now()
-    #         self.save()
-    #         return self.finalized
-    #     return None
 
     @property
     def get_time_to_finish(self):
-        if not self.started or not self.estimated_time or not self.estimated_unit_time:
-            print('first')
+        """returns the previst datetime to finish the task
+        based in: started, estimated_time and esitmated_unit_time"""
+        if not self.started or not self.estimated_time or not self.esitmated_unit_time:
             return None
         if self.started and self.finalized:
-            print('second')
             return None
-        if self.stimated_unit_time == self.UnitTime.HOUR:
-            estimated_finish = tz.now() + timedelta(hours=self.estimated_time)
+        if self.esitmated_unit_time == self.UnitTime.HOUR:
+            estimated_finish = self.started + timedelta(hours=self.estimated_time)
         else:
-            estimated_finish = tz.now() + timedelta(days=self.estimated_time)
-        print('final')
+            estimated_finish = self.started + timedelta(days=self.estimated_time)
 
-        estimated_finish = self.started + estimated_finish 
         return estimated_finish.replace(second=0, microsecond=0)
 
     class Meta:
