@@ -1,3 +1,4 @@
+from datetime import timedelta
 from django.utils import timezone as tz
 from django.test import TestCase
 from .models import Task, Project
@@ -34,11 +35,11 @@ class TaskTests(TestCase):
     def test_task_default_values(self):
         """checks the expected value dates """
         self.assertIsNone(self.task.started)
-        self.assertIsNone(self.task.finalized)
+        self.assertIsNone(self.task.completed)
         self.assertIsNone(self.task.estimated_time)
         self.assertEqual(self.task.esitmated_unit_time, Task.UnitTime.HOUR)
 
-        # get_time_to_finish is not None only when started exists and finalized is None
+        # get_time_to_finish is not None only when started exists and completed is None
         self.assertIsNone(self.task.get_time_to_finish)
 
         
@@ -64,23 +65,32 @@ class TaskTests(TestCase):
         self.assertEqual(self.task.started.replace(second=0, microsecond=0),
                           tz.now().replace(second=0, microsecond=0))
         
-    def test_task2_change_status_working_to_finished(self):
-        """change status of task2 must update the values of started and finalized"""
+    def test_task2_change_status_working_to_completed(self):
+        """change status of task2 must update the values of started and completed"""
         # it has been created with status WORKING so created exists
         self.assertIsNotNone(self.task2.started)
-        self.assertIsNone(self.task2.finalized)
+        self.assertIsNone(self.task2.completed)
 
-        # when change status to FINISHED finalized is created
-        self.task2.status = Task.Status.FINISHED
+        # when change status to COMPLETED completed is created
+        self.task2.status = Task.Status.COMPLETED
         self.task2.save()
-        self.assertIsNotNone(self.task2.finalized)
+        self.assertIsNotNone(self.task2.completed)
 
-        # if change status from FINISHED to WAITING started and finalized are set to None
+        # if change status from COMPLETED to WAITING started and completed are set to None
         self.task2.status = Task.Status.PENDING
         self.task2.save()
         self.assertIsNone(self.task2.started)
-        self.assertIsNone(self.task2.finalized)
+        self.assertIsNone(self.task2.completed)
 
     def test_task2_get_time_to_finish(self):
         """beacuse task2 was registred with status WORKING it must have a get_time_to_finish"""
         self.assertIsNotNone(self.task2.get_time_to_finish)
+
+        # the default unit time is hours
+        prevition_task = self.task2.started + timedelta(hours=self.task2.estimated_time)
+
+        # must be equal to started + stimated_time    
+        self.assertEqual(self.task2.get_time_to_finish, prevition_task)
+        
+        # must be diferent to started time
+        self.assertNotEqual(self.task2.get_time_to_finish, self.task2.started) 

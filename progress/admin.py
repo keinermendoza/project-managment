@@ -37,7 +37,7 @@ class TaskNoteStackedAdmin(admin.StackedInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ["project", "started", "finalized", "get_time_to_finish"]
+    readonly_fields = ["project", "created", "started", "completed", "get_time_to_finish"]
     inlines = [TaskNoteStackedAdmin]
 
     # Django Docs are Awesome

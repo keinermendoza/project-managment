@@ -21,7 +21,7 @@ class Project(models.Model):
         GROW = (4, 'Adjusting details')
         IMPLEMENTIG = (5, 'Deploying version 1')
         ITERATING = (6, 'Improving Performance and adding new Features')
-        FINISHED = (7, 'Completed')
+        COMPLETED = (7, 'Completed')
 
 
     name = models.CharField(max_length=120)
@@ -58,7 +58,7 @@ class Task(models.Model):
         PENDING = (1, 'Not started yet')
         WORKING = (2, 'Working on it')
         WAITING = (3, 'Waiting feed back')
-        FINISHED = (4, 'Completed')
+        COMPLETED = (4, 'Completed')
 
     class UnitTime(models.TextChoices):
         HOUR = ('H', 'Hour')
@@ -74,7 +74,7 @@ class Task(models.Model):
                                            default=UnitTime.HOUR)
     
     started = models.DateTimeField(null=True)
-    finalized = models.DateTimeField(null=True)
+    completed = models.DateTimeField(null=True)
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     created = models.DateTimeField(auto_now_add=True)
@@ -87,46 +87,48 @@ class Task(models.Model):
         self.__original_status = self.status
 
     def save(self, *args, **kwargs):
-        """updates the started and finalized dateTime
+        """updates the started and completed dateTime
         in relation to previous a new status"""
 
-        # new task with status WORKING
-        if not self.id and self.status == self.Status.WORKING:
-            self.started = tz.now()
+        # no changes
+        if self.id and self.status == self.__original_status:
+            pass
 
-        # old task marked previously as FINISHED and changed
-        elif self.__original_status == self.Status.FINISHED\
-            and self.status != self.Status.FINISHED:
-
-            # set both to None. except if new status is WORKING 
-            self.started = None
-            self.finalized = None
-            if self.status == Task.Status.WORKING: 
-                self.started = tz.now()
-
-
-        # new or old task marked previously as NOT WORKING. 
-        elif self.__original_status != self.Status.WORKING: 
-            
+        # new task
+        elif not self.id:
             if self.status == self.Status.WORKING:
                 self.started = tz.now()
 
-            elif self.status == self.Status.FINISHED:
+            elif self.status == self.Status.COMPLETED:
                 self.started = tz.now()
-                self.finalized = tz.now()
+                self.completed = tz.now()
+
+        # old task marked previously as NOT WORKING. 
+        elif self.__original_status != self.Status.WORKING:
+
+            # if previously state was COMPLETED set both to None 
+            if self.__original_status == self.Status.COMPLETED:
+                self.started = None
+                self.completed = None
+
+            if self.status == self.Status.WORKING:
+                self.started = tz.now()
+
+            elif self.status == self.Status.COMPLETED:
+                self.started = tz.now()
+                self.completed = tz.now()
 
         # old task marked previously as WORKING. 
-        else:
-            # if new status is FINISHED 
-            if self.status == self.Status.FINISHED:
-                self.finalized = tz.now()
+        elif self.__original_status == self.Status.WORKING:
+
+            # if new status is COMPLETED 
+            if self.status == self.Status.COMPLETED:
+                self.completed = tz.now()
 
             # if new status is PENDING or WAITING
-            elif self.status == self.Status.FINISHED\
-                or self.status == self.Status.WAITING:
-
+            elif self.status in [self.Status.COMPLETED, self.Status.WAITING]:
                 self.started = None
-                self.finalized = None
+                self.completed = None
 
         super(Task, self).save(*args, **kwargs)
         self.__original_status = self.status
@@ -139,14 +141,14 @@ class Task(models.Model):
         based in: started, estimated_time and esitmated_unit_time"""
         if not self.started or not self.estimated_time or not self.esitmated_unit_time:
             return None
-        if self.started and self.finalized:
+        if self.started and self.completed:
             return None
         if self.esitmated_unit_time == self.UnitTime.HOUR:
             estimated_finish = self.started + timedelta(hours=self.estimated_time)
         else:
             estimated_finish = self.started + timedelta(days=self.estimated_time)
 
-        return estimated_finish.replace(second=0, microsecond=0)
+        return estimated_finish.astimezone(self.started.tzinfo)
 
     class Meta:
         ordering = ['-created', '-importance', '-status',]
