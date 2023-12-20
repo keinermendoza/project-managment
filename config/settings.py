@@ -41,6 +41,9 @@ INSTALLED_APPS = [
     # own 
     'account',
     'progress',
+
+    # third
+    'django_htmx',
 ]
 
 MIDDLEWARE = [

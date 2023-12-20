@@ -1,7 +1,7 @@
 from datetime import timedelta, timezone
 from django.utils import timezone as tz
 from django.test import TestCase
-from .models import Task, Project
+from progress.models import Task, Project
 
 class TaskTests(TestCase):
     def setUp(self):
