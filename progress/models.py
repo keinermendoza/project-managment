@@ -148,7 +148,7 @@ class Task(models.Model):
         else:
             estimated_finish = self.started + timedelta(days=self.estimated_time)
 
-        return estimated_finish.astimezone(self.started.tzinfo)
+        return estimated_finish.astimezone(tz.get_current_timezone())
 
     class Meta:
         ordering = ['-created', '-importance', '-status',]

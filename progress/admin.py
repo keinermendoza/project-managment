@@ -1,13 +1,17 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.utils.translation import get_language
+from django.utils import formats
 
+from .utils import import_datetieme_format
 from .models import Project, Task, TaskNote, ProjectNote
 
 
 def project_view(obj):
     url = reverse('progress:admin_project_view', args=[obj.id])
     return mark_safe(f'<a href="{url}">View</a>')
+
 
 class ProjectNoteAdmin(admin.StackedInline):
     """for see the projectNote form inside the ProjectAdmin"""
@@ -37,7 +41,7 @@ class TaskNoteStackedAdmin(admin.StackedInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ["project", "created", "started", "completed", "get_time_to_finish"]
+    readonly_fields = ["project", "created", "started", "completed", "espected_finish"]
     inlines = [TaskNoteStackedAdmin]
 
     # Django Docs are Awesome
@@ -53,6 +57,13 @@ class TaskAdmin(admin.ModelAdmin):
             instance.save()
         # formset.save_m2m()
 
+    def espected_finish(self, obj):
+        """Returns the get_time_to_finish property in the same format
+        of the other datetime fields."""
+
+        format = import_datetieme_format(get_language())
+        return formats.date_format(obj.get_time_to_finish, format=format)
+    
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
     list_display = ['name', project_view, 'importance', 'status', 'created', ]

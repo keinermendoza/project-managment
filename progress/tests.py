@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, timezone
 from django.utils import timezone as tz
 from django.test import TestCase
 from .models import Task, Project
@@ -50,11 +50,10 @@ class TaskTests(TestCase):
                           tz.now().replace(second=0, microsecond=0))
 
     def test_task_change_status_to_wroking(self):
-        """change status of task to working must change the task.started value"""
+        """changes on status must update the values of started and completed"""
         
         # by default started is None
         self.assertIsNone(self.task.started)
-
         
         self.task.status = Task.Status.WORKING
         self.task.save()
@@ -66,7 +65,8 @@ class TaskTests(TestCase):
                           tz.now().replace(second=0, microsecond=0))
         
     def test_task2_change_status_working_to_completed(self):
-        """change status of task2 must update the values of started and completed"""
+        """changes on status must update the values of started and completed"""
+
         # it has been created with status WORKING so created exists
         self.assertIsNotNone(self.task2.started)
         self.assertIsNone(self.task2.completed)
@@ -76,14 +76,15 @@ class TaskTests(TestCase):
         self.task2.save()
         self.assertIsNotNone(self.task2.completed)
 
-        # if change status from COMPLETED to WAITING started and completed are set to None
+        # if change status from COMPLETED to WAITING started and completed 
+        # are set to None
         self.task2.status = Task.Status.PENDING
         self.task2.save()
         self.assertIsNone(self.task2.started)
         self.assertIsNone(self.task2.completed)
 
     def test_task2_get_time_to_finish(self):
-        """beacuse task2 was registred with status WORKING it must have a get_time_to_finish"""
+        """checks the calculation time of get_time_to_finish"""
         self.assertIsNotNone(self.task2.get_time_to_finish)
 
         # the default unit time is hours
@@ -94,3 +95,15 @@ class TaskTests(TestCase):
         
         # must be diferent to started time
         self.assertNotEqual(self.task2.get_time_to_finish, self.task2.started) 
+
+    def test_timezone_get_time_to_finish(self):
+        """all dates are time-zone utc (the convertion is handel by django)
+        except get_time_to_finish that uses by default the project time-zone"""
+        
+        # started is in utc
+        self.assertEquals(self.task2.started.tzinfo, timezone.utc)
+        # get_time_to_finish is in current timezone
+        self.assertEquals(self.task2.get_time_to_finish.tzinfo, tz.get_current_timezone())
+
+        # started and get_time_to_finish are in different timezones
+        self.assertNotEquals(self.task2.started.tzinfo, self.task2.get_time_to_finish.tzinfo)
