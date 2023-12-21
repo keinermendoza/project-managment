@@ -1,4 +1,4 @@
-from django.test import TestCase, Client, RequestFactory
+from django.test import TestCase, Client
 from django.urls import reverse
 from account.models import User
 from progress.models import Project, Task
@@ -8,7 +8,6 @@ from progress.views import project_detail, projects_all\
 class TestProjectViews(TestCase):
     def setUp(self):
         
-        self.requestFactory = RequestFactory()
         self.client = Client()
 
         # creating users
@@ -49,7 +48,7 @@ class TestProjectViews(TestCase):
         }
 
         data_private_project_2 = {
-            'user': self.user_one,
+            'user': self.user_two,
             'public': False,
             'name': 'public project',
             'description': 'description of my test project',
@@ -65,7 +64,7 @@ class TestProjectViews(TestCase):
             'private': reverse('progress:projects_private'),
             'detail_public_1': reverse('progress:project_detail', args=[self.public_project_1.id]),
             'detail_private_1': reverse('progress:project_detail', args=[self.private_project_1.id]),
-            'detail_private_2"': reverse('progress:project_detail', args=[self.private_project_2.id]),
+            'detail_private_2': reverse('progress:project_detail', args=[self.private_project_2.id]),
             'admin_view': reverse('progress:admin_project_view', args=[self.private_project_1.id]),
         }
 
@@ -86,7 +85,7 @@ class TestProjectViews(TestCase):
         self.assertIsInstance(self.private_project_1, Project)
         self.assertIsInstance(self.private_project_2, Project)
 
-    ### TESTING VIEWS WITH AN ANONIMOUS USER
+    ### HOME VIEW
     def test_user_anonimous_get_home(self):
         """anonimous user can requests the home view"""
         
@@ -105,6 +104,41 @@ class TestProjectViews(TestCase):
         self.assertNotIn('progress/base.html', response.templates)
         self.assertTemplateUsed(response, 'progress/snippets/home.html')
 
+
+    ### PROJECTS PUBLIC VIEW
+
+    def test_user_anonimous_get_projects_public(self):
+        """anonimous user can requests the projects_public view
+        response contains only the public projects"""
+        
+        self.client.force_login(self.user_two)
+        response = self.client.get(self.routes['public'])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'progress/project_list.html')
+        self.assertIn(self.public_project_1, response.context['projects'])
+        self.assertNotIn(self.private_project_1, response.context['projects'])
+        self.assertNotIn(self.private_project_2, response.context['projects'])
+
+
+    def test_user_two_get_projects_public_using_HTMX(self):
+        """user two can sucefully requests the projects_public view
+        response contains only the public projects
+        the response is a partial html"""
+        
+        response = self.client.get(self.routes['public'], **self.use_HTMX)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'progress/snippets/project_list.html')
+        self.assertNotIn('progress/base.html', response.templates)
+
+        self.assertIn(self.public_project_1, response.context['projects'])
+        self.assertNotIn(self.private_project_1, response.context['projects'])
+        self.assertNotIn(self.private_project_1, response.context['projects'])
+
+  
+
+    ### PROJECTS ALL VIEW
     def test_user_anonimous_get_projects_all(self):
         """anonimous user can requests the projects_all view
         response contains only the public projects"""
@@ -116,8 +150,10 @@ class TestProjectViews(TestCase):
         self.assertIn(self.public_project_1, response.context['projects'])
         self.assertNotIn(self.private_project_1, response.context['projects'])
 
+
+
     def test_user_anonimous_get_projects_all_using_HTMX(self):
-        """anonimous user can requests the projects_all view
+        """anonimous user can sucefully requests the projects_all view
         response contains only the public projects
         the response is a partial html"""
         
@@ -132,9 +168,11 @@ class TestProjectViews(TestCase):
 
 
     def test_user_one_get_get_projects_all(self):
-        request = self.requestFactory.get(self.routes['all'])
-        request.user = self.user_one
-        response = projects_all(request)
+        """user one can sucefully requests the projects_all view
+        response contains private user one project and all public projects"""
+
+        self.client.force_login(self.user_one)
+        response = self.client.get(self.routes['all'])
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'progress/project_list.html')
@@ -143,7 +181,74 @@ class TestProjectViews(TestCase):
         # it's also present the private project of the current user
         self.assertIn(self.private_project_1, response.context['projects'])
 
-        # self.assertNotIn(self.private_project_1, response.context['projects'])
+        # user cannot see private projects of other users
+        self.assertNotIn(self.private_project_2, response.context['projects'])
+
+
+    def test_user_one_get_get_projects_all(self):
+        """user one can sucefully requests the projects_all view
+        response contains private user one project and all public projects"""
+
+        self.client.force_login(self.user_one)
+        response = self.client.get(self.routes['all'])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'progress/project_list.html')
+        self.assertIn(self.public_project_1, response.context['projects'])
+
+        # it's also present the private project of the current user
+        self.assertIn(self.private_project_1, response.context['projects'])
+
+        # user cannot see private projects of other users
+        self.assertNotIn(self.private_project_2, response.context['projects'])
+
+
+    # ADMIN PROJECT VIEW
+    def test_not_staff_users_cannot_request_suceffully_admin_view(self):
+        """user with no staff permition cannot accesss to admin_project_view"""
+
+        # User One
+        self.client.force_login(self.user_one)
+        response = self.client.get(self.routes['admin_view'])
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertIsNone(response.context)
+        self.assertEqual(response.content, b'')
+
+        # User Two
+        self.client.force_login(self.user_two)
+        response = self.client.get(self.routes['admin_view'])
+
+        self.assertNotEqual(response.status_code, 200)
+        self.assertIsNone(response.context)
+        self.assertEqual(response.content, b'')
+
+    def test_superuser_can_access_admin_view(self):
+        """admin_user is superuser so it can access to admin_project_view"""
+
+        self.client.force_login(self.user_admin)
+        response = self.client.get(self.routes['admin_view'])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.private_project_1, response.context['project'])
+
+
+    def test_detail_project_view_protects_private_projects(self):
+        """users cannot access to detail project view of private projects 
+            from another users"""
+        
+        # user one is not the owner of this project
+        self.client.force_login(self.user_one)
+        response = self.client.get(self.routes['detail_private_2'])
+
+        self.assertEqual(response.status_code, 404)
+
+        # user two is the owner
+        self.client.force_login(self.user_two)
+        response = self.client.get(self.routes['detail_private_2'])
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.private_project_2, response.context['project'])
 
 
     # def test_user_anonimous_get_projects_public_using_HTMX(self):

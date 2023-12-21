@@ -66,7 +66,10 @@ def projects_private(request):
     return render(request, template_name, {'projects':projects, 'active_section':'private', 'title':title})
 
 def project_detail(request, project_id):
-    pass
+    project = get_object_or_404(Project, id=project_id, user=request.user)
+    return render(request, "progress/project_detail.html", {'project':project})
+
+
 
 @staff_member_required
 def admin_project_view(request, project_id):

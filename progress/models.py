@@ -1,5 +1,6 @@
 from datetime import timedelta
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone as tz
 from django.core.exceptions import ValidationError
 
@@ -44,6 +45,10 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        return reverse('progress:project_detail', args=[self.id])
+    
     
 
 class Task(models.Model):

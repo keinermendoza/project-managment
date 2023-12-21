@@ -1,0 +1,50 @@
+{% extends 'progress/base.html' %}
+{% load static %}
+{% block title %}{{project.name | capfirst}}{% endblock title %}
+
+{% block main %}
+<figure class="mx-auto w-full md:w-1/2">
+    {% if project.image %}
+        <img class="w-full" src="{{project.image.url}}" alt="{{project.name}}">
+    {% else %}
+        <img class="w-full" src="{% static 'progress/img/notImageProvided.png'  %}" alt="{{project.name}}">
+    {% endif %}
+</figure>    
+
+<h1>{{project.name}}</h1>
+
+    <p>{{project.description}}</p>
+    <p>{{project.get_status_display}}</p>
+    <p class="italic text-sm">Project Created on {{project.created}}</p>
+
+    <section>
+        {% for task in project.tasks.all %}
+        <article>
+            <h3>{{task.name}}</h3>
+            <p>{{task.description}}</p>
+            <p>{{task.get_importance_display}}</p>
+            <p>Time estimated for task: {{task.estimated_time}} {{task.estimated_unit_time}}</p>
+
+        {% if  task.started and not task.completed %}
+            <p class="italic text-sm">Task started on {{task.started}}</p>
+            <p>Finich estimated on {{task.get_time_to_finish}}</p>
+        
+        {% elif task.started and task.completed %}
+            <p class="italic text-sm">Task Completed on {{task.completed}}</p>
+        {% endif %}
+            
+            <ul>
+                {% for note in task.task_notes.all %}
+                <li>
+                    <span>By {% if note.user %}{{note.user.username}}{% else%}Anonimous{% endif %}</span>
+                    <span>{{note.message}}</span>
+                    <span>On: {{note.created}}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </article>
+        {% endfor %}
+    </section>
+
+{% endblock main %}
+    
