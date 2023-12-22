@@ -16,13 +16,12 @@ class Project(models.Model):
         URGENT = (5, 'Urgent')       
 
     class Status(models.IntegerChoices):
-        IDEA = (1, 'Proccessing the business model')
+        IDEA = (1, 'Proccessing the requirements')
         DESING = (2, 'Desiging the user interaction')
-        MODELS = (3, 'Creating prototipe app')
-        GROW = (4, 'Adjusting details')
-        IMPLEMENTIG = (5, 'Deploying version 1')
-        ITERATING = (6, 'Improving Performance and adding new Features')
-        COMPLETED = (7, 'Completed')
+        DEVELOPING = (3, 'Developing first version')
+        IMPLEMENTIG = (4, 'Deploying first version')
+        ITERATING = (5, 'Adding more requirements')
+        COMPLETED = (6, 'Completed')
 
 
     name = models.CharField(max_length=120)
