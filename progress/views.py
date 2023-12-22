@@ -67,7 +67,7 @@ def projects_private(request):
 
 def project_detail(request, project_id):
     project = get_object_or_404(Project, id=project_id, user=request.user)
-    return render(request, "progress/project_detail.html", {'project':project})
+    return render(request, "progress/project_detail.html", {'project':project, 'active_section':''})
 
 
 

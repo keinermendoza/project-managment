@@ -29,7 +29,7 @@ class Project(models.Model):
     description = models.TextField()
     importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
     status = models.IntegerField(choices=Status.choices, default=Status.IDEA)
-    image = models.FileField(upload_to='projects', null=True)
+    image = models.FileField(upload_to='projects', null=True, blank=True)
     user = models.ForeignKey(User, related_name="projects", on_delete=models.CASCADE, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -78,8 +78,8 @@ class Task(models.Model):
     esitmated_unit_time = models.CharField(max_length=1, choices=UnitTime.choices,
                                            default=UnitTime.HOUR)
     
-    started = models.DateTimeField(null=True)
-    completed = models.DateTimeField(null=True)
+    started = models.DateTimeField(null=True, blank=True)
+    completed = models.DateTimeField(null=True, blank=True)
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     created = models.DateTimeField(auto_now_add=True)

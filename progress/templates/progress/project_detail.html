@@ -3,6 +3,8 @@
 {% block title %}{{project.name | capfirst}}{% endblock title %}
 
 {% block main %}
+<div class="grid">
+
 <figure class="mx-auto w-full md:w-1/2">
     {% if project.image %}
         <img class="w-full" src="{{project.image.url}}" alt="{{project.name}}">
@@ -46,5 +48,6 @@
         {% endfor %}
     </section>
 
+</div>
 {% endblock main %}
     

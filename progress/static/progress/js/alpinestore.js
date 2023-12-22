@@ -14,6 +14,9 @@ document.addEventListener('alpine:init', () => {
 
         isActive(sectionName) {
             return this.activeSection.find((section) => section.name === sectionName).isActive
+        },
+        deactivate() {
+            this.activeSection = this.activeSection.map(section => ({...section, isActive: false}))
         }
     
     })

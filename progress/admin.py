@@ -7,6 +7,19 @@ from django.utils import formats
 from .utils import import_datetieme_format
 from .models import Project, Task, TaskNote, ProjectNote
 
+from django import forms
+
+# class TaskFormForProjectAdmin(forms.ModelForm):
+#     class Meta:
+#         model = Task
+#         exclude = ["user", "get_time_to_finish"]
+
+def espected_finish(obj):
+    """Returns the get_time_to_finish property of a TASK 
+    in the same format of the other datetime fields."""
+
+    format = import_datetieme_format(get_language())
+    return formats.date_format(obj.get_time_to_finish, format=format)
 
 def project_view(obj):
     url = reverse('progress:admin_project_view', args=[obj.id])
@@ -21,8 +34,12 @@ class ProjectNoteAdmin(admin.StackedInline):
 
 class TaskStackedAdmin(admin.StackedInline):
     """for see the task form inside the ProjectAdmin"""
+    # form = TaskFormForProjectAdmin
+    readonly_fields = [espected_finish]
     model = Task
     extra = 1
+
+    
 
  
 
@@ -41,7 +58,8 @@ class TaskNoteStackedAdmin(admin.StackedInline):
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    readonly_fields = ["project", "created", "started", "completed", "espected_finish"]
+    save_on_top = True
+    readonly_fields = ["project", "created", "started", "completed", espected_finish]
     inlines = [TaskNoteStackedAdmin]
 
     # Django Docs are Awesome
@@ -56,16 +74,10 @@ class TaskAdmin(admin.ModelAdmin):
                 instance.user = request.user
             instance.save()
         # formset.save_m2m()
-
-    def espected_finish(self, obj):
-        """Returns the get_time_to_finish property in the same format
-        of the other datetime fields."""
-
-        format = import_datetieme_format(get_language())
-        return formats.date_format(obj.get_time_to_finish, format=format)
     
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
+    save_on_top = True
     list_display = ['name', project_view, 'importance', 'status', 'created', ]
     search_fields = ['name', 'description']
     inlines = [ProjectNoteAdmin, TaskStackedAdmin]
