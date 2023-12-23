@@ -3,80 +3,89 @@
 <article 
     class="grid bg-slate-300 text-center border broder-solid border-slate-900
         rounded-md overflow-hidden shadow-xl">
-    <figure class="w-full rounded bg-slate-500">
 
-        {% if project.image %}
-        <img src="{{project.image.url}}" alt="{{project.name}}" 
-            class="w-full mb-6">
-            
-        {% else %}
-        <img src="{% static 'progress/img/notImageProvided.png' %}" alt="secret image" 
-            class="w-1/2 m-2 mx-auto">
+    <header>
 
-        {% endif %}
-    </figure>
+        <figure class="w-full h-52 overflow-hidden rounded  bg-slate-500">
+
+            {% if project.image %}
+            <img src="{{project.image.url}}" alt="{{project.name}}" 
+                class="w-full h-full object-cover mb-6">
+                
+            {% else %}
+            <img src="{% static 'progress/img/notImageProvided.png' %}" alt="secret image" 
+                class="w-1/2 h-full p-2 mx-auto">
+
+            {% endif %}
+        </figure>
+    </header>
+    <main class="p-2">
+
     
-    
-    <h3 class="text-xl my-3 text-center text-slate-900 dark:text-white">
-        {{project.name}}
-    </h3>
-
-    <!-- <p class="italic mt-2">Project State:</p> -->
-    <p class="px-2 text-center text-sm">
-        <span class="mr-5 relative
-
-        {% if project.status < 3 %}
-        before:bg-yellow-200
-
-        {% elif project.status  < 5 %}
-        before:bg-blue-200
-
-        {% else %}
-        before:bg-green-500
-        {% endif %}
-
-        before:border-2 before:border-solid before:border-black
-        before:content-[''] before:rounded-full
-        before:w-5 before:h-5 before:absolute 
-        before:-left-1 before:-top-[0.1em]
-        before:transition-all before:duration-500"></span>
-        {{ project.get_status_display}}
-    </p>
-    
-    <div class="relative mt-5 mx-2 p-3 pt-5 rounded border-solid border-2 border-black">
-        <h3 class="absolute inline  inset-0 -top-3 mx-auto">
-            <span class="px-2 bg-slate-300">Tasks</span>
+        <h3 class="text-xl my-3 text-center text-slate-900 dark:text-white">
+            {{project.name}}
         </h3>
 
-        <ul class="grid grid-cols-3 gap-3 text-[0.7em]">
-            
-            <li class="place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
-                {% with project.tasks.count as all_tasks %}
-                <span>All</span><br>
-                <span class="text-2xl">{{all_tasks}}</span>
-                {% endwith %}
-            </li>
-            
-            <li class="text-center place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
-                {% with project|get_completed_tasks as completed_tasks %}
-                <span>Ready</span><br>
-                <span class="text-2xl">{{completed_tasks}}</span>
-                {% endwith %}
-            </li>
-            
-            <li class="place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
-                {% with project|get_uncompleted_tasks as uncompleted_tasks %}
-                <span>No Ready</span><br>
-                <span class="text-2xl">{{uncompleted_tasks}}</span>
-                {% endwith %}
-            </li>
-            
-        </ul>
-    </div>
+        <!-- <p class="italic mt-2">Project State:</p> -->
+        <p class="px-2 text-center text-sm">
+            <span class="mr-5 relative
+
+            {% if project.status < 3 %}
+            before:bg-yellow-200
+
+            {% elif project.status  < 5 %}
+            before:bg-blue-200
+
+            {% else %}
+            before:bg-green-500
+            {% endif %}
+
+            before:border-2 before:border-solid before:border-black
+            before:content-[''] before:rounded-full
+            before:w-5 before:h-5 before:absolute 
+            before:-left-1 before:-top-[0.1em]
+            before:transition-all before:duration-500"></span>
+            {{ project.get_status_display}}
+        </p>
+        
+        <div class="relative mt-5 mx-2 p-3 pt-5 rounded border-solid border-2 border-black">
+            <h3 class="absolute inline  inset-0 -top-3 mx-auto">
+                <span class="px-2 bg-slate-300">Tasks</span>
+            </h3>
+
+            <ul class="grid grid-cols-3 gap-3 text-[0.7em]">
+                
+                <li class="place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
+                    {% with project.tasks.count as all_tasks %}
+                    <span>All</span><br>
+                    <span class="text-2xl">{{all_tasks}}</span>
+                    {% endwith %}
+                </li>
+                
+                <li class="text-center place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
+                    {% with project|get_completed_tasks as completed_tasks %}
+                    <span>Ready</span><br>
+                    <span class="text-2xl">{{completed_tasks}}</span>
+                    {% endwith %}
+                </li>
+                
+                <li class="place-content-center bg-gray-300 p-3 rounded border-solid border-black border-2 min-h-10">
+                    {% with project|get_uncompleted_tasks as uncompleted_tasks %}
+                    <span>No Ready</span><br>
+                    <span class="text-2xl">{{uncompleted_tasks}}</span>
+                    {% endwith %}
+                </li>
+                
+            </ul>
+        </div>
+    </main>
     
-    <a class="p-2 mt-5 mb-2 rounded bg-blue-900 text-white place-self-center"
+    <footer class="my-3">
+
+        <a class="inline-block p-2  rounded bg-blue-900 text-white place-self-center"
         @click="$store.section.deactivate()"
         href="{{project.get_absolute_url}}"  >See Details</a>
+    </footer>
 
 </article>
 

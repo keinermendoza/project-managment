@@ -1,0 +1,9 @@
+{% for note in object_notes_all %}
+
+<div>
+    <p class="text-lg font-semibold">By {% if note.user %}{{note.user.username}}{% else%}Anonimous{% endif %}</p>
+    <p>{{note.message}}</p>
+    <p class="italic text-sm">On: {{note.created}}</p>
+</div>
+
+{% endfor %}

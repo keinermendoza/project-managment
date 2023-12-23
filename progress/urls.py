@@ -9,5 +9,9 @@ urlpatterns = [
     path('projects/private/', views.projects_private, name="projects_private"),
     path('project/<int:project_id>/', views.project_detail, name="project_detail"),
 
+    # curl
+    path('project/create/<int:project_id>/', views.create_project_note, name="create_project_note"),
+    path('task/create/<int:note_id>/', views.create_task_note, name="create_task_note"),
+
     path('', views.home, name='projects_home'),
 ]

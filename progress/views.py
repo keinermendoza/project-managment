@@ -1,10 +1,12 @@
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseForbidden
+from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
-from .models import Project
+from .models import Task, Project, TaskNote, ProjectNote
+from .forms import NoteForm
 
 def home(request):
 
@@ -85,3 +87,19 @@ def project_detail(request, project_id):
 def admin_project_view(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     return render(request, "admin/progress/project/detail.html", {'project':project})
+
+@login_required
+def create_project_note(request, project_id):
+    if request.method == "POST":
+        project = get_object_or_404(Project, id=project_id)
+        form = NoteForm(request.POST)
+        if form.is_valid():
+            message = form.cleaned_data['note']
+            print('MESSAGE', message)
+            new_note = ProjectNote.objects.create(user=request.user, project=project, message=message)
+            return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
+        return HttpResponseBadRequest
+    return HttpResponseNotAllowed
+        
+def create_task_note(request, task_id):
+    pass
