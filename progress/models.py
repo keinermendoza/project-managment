@@ -53,10 +53,9 @@ class Project(models.Model):
 class Task(models.Model):
     class Importance(models.IntegerChoices):
         LOW = (1, 'Low')
-        INTERESTIG = (2, 'Interesting')
-        NORMAL = (3, 'Normal')
-        IMPORTANT = (4, 'Importat')
-        URGENT = (5, 'Urgent')       
+        NORMAL = (2, 'Normal')
+        IMPORTANT = (3, 'Importat')
+        URGENT = (4, 'Urgent')       
 
     class Status(models.IntegerChoices):
         PENDING = (1, 'Not started yet')
