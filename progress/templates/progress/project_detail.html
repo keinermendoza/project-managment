@@ -13,12 +13,100 @@
     {% endif %}
 </figure>    
 
-<h1 class="text-4xl text-center mt-2">{{project.name}}</h1>
+{% with project.project_notes.count as note_count %}
+<!-- main project section -->
+<section x-data="{visible:false}"
+        class="my-5">
+
+    <h1 class="text-4xl text-center mt-2">{{project.name}}</h1>
     <div class="my-2">
         <p>{{project.description}}</p>
         <p class="italic text-sm">Actual State: {{project.get_status_display}}</p>
         <p class="italic text-sm">Project Created on {{project.created}}</p>
     </div>
+    
+    <div class="bg-gray-400 flex justify-between rounded-lg p-2 w-full">
+        
+        <div class="grid place-content-center">
+            
+            <div class="relative">
+                <svg class="absolute top-1" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
+                    <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H288V352c0-17.7 14.3-32 32-32h80V96c0-8.8-7.2-16-16-16H64zM288 480H64c-35.3 0-64-28.7-64-64V96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V320v5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7H288z"/>
+                </svg>
+                <span class="inline-block ms-5">{{note_count}}</span> 
+                <span class="inline-block"> note{{note_count | pluralize}}</span>
+            </div>
+            
+        </div>
+
+        <!-- Modal toggle -->
+        <button @click="visible = true"
+                data-modal-target="default-modal" data-modal-toggle="default-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+            Project Notes
+        </button>
+        
+    </div>
+
+
+
+        
+          
+    <!-- Main modal -->
+    <div  x-show="visible"
+        
+    
+        id="default-modal" tabindex="-1" aria-hidden="true" class="bg-gray-600 bg-opacity-50 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-full max-h-full">
+        <div @click.outside="visible = false"
+            class="relative p-4 w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative mx-auto flex flex-col  max-h-[calc(100vh-2rem)]   overflow-y-auto     bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Notes of Project: {{project.name}} 
+                    </h3>
+                    <!-- close button-->
+                    <button @click="visible = false"
+                            type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body --> 
+                <div class="flex-auto overflow-y-auto relative p-4">
+                    <!-- project notes goes here-->
+                {% if note_count > 0 %}
+                    
+                {% for note in project.project_notes.all  %}
+                <div>
+                    <p class="text-lg font-semibold">By {% if note.user %}{{note.user.username}}{% else%}Anonimous{% endif %}</p>
+                    <p>{{note.message}}</p>
+                    <p class="italic text-sm">On: {{note.created}}</p>
+                </div>
+                {% endfor %}
+                
+                {% endif %}
+
+
+
+                
+                </div>
+                <!-- Modal footer -->
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <form class="w-full" action="" method="post">
+                    <textarea class="w-full mb-2 p-2 rounded-lg border-solid border-2 border-b-gray-200" name="tasknote" placeholder="Add a Note" id="" cols="" rows="3"></textarea>
+                    <button data-modal-hide="default-modal" type="button" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Save</button>
+                </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+          
+</section>
+{% endwith %}
 
     <section>
         {% with task_count=project.tasks.count %}
@@ -26,15 +114,16 @@
         <p class="text-sm">This project has {{task_count}} task{{task_count| pluralize}}</p>
         {% endwith %}
         
+
         {% for task in project.tasks.all %}
         <article class="my-2 bg-gray-300 border-solid border-gray-900 border-2 rounded ">
             <!-- title task -->
-            <h3 class="p-3 flex gap-3 justify-between bg-gray-400">
+            <header class="p-3 flex gap-3 justify-between bg-gray-400">
                 <span class="grid place-content-center text-xl">{{task.name}}</span>
                 <span class="p-1 shadow rounded bg-gray-100 grid place-self-start text-[0.7em] text-center">{{task.get_status_display}}</span>
-            </h3>
+            </header>
 
-            <div class="px-3">
+            <main class="px-3">
                 <p class="my-3">{{task.description}}</p>
 
                 <div class="my-3 text-sm">
@@ -49,18 +138,30 @@
                     <p class="mt-1 font-semibold">Estimated Delivery <br>{{task.get_time_to_finish}}</p>
                 
                 {% elif task.started and task.completed %}
-                    <p class="italic ">Task Completed on {{task.completed}}</p>
+                    <p class="italic">Task Completed on {{task.completed}}</p>
 
                 {% endif %}
                 </div>
-            </div>
+            </main>
 
-            <h3 class="px-3 py-1 text-sm flex gap-3 justify-between bg-gray-400">
+            <footer class="px-3 py-1 text-sm flex gap-3 justify-between bg-gray-400">
                 {% with note_count=task.task_notes.count %}
-                <span class="grid place-content-center">This Task has {{note_count}} note{{note_count | pluralize}}</span>
+                <div class="grid place-content-center">
+                    
+                    <div class="relative">
+                        <svg class="absolute top-[0.125em]" xmlns="http://www.w3.org/2000/svg" height="16" width="14" viewBox="0 0 448 512">
+                            <path d="M64 80c-8.8 0-16 7.2-16 16V416c0 8.8 7.2 16 16 16H288V352c0-17.7 14.3-32 32-32h80V96c0-8.8-7.2-16-16-16H64zM288 480H64c-35.3 0-64-28.7-64-64V96C0 60.7 28.7 32 64 32H384c35.3 0 64 28.7 64 64V320v5.5c0 17-6.7 33.3-18.7 45.3l-90.5 90.5c-12 12-28.3 18.7-45.3 18.7H288z"/>
+                        </svg>
+                        <span class="inline-block ms-5">{{note_count}}</span> 
+                        <span class="inline-block"> note{{note_count | pluralize}}</span>
+                    </div>
+                </div>
+
                 <span class="p-1 border-solid border-2 rounded bg-blue-600 cursor-pointer text-center">Show</span>
-                {% endwith %}
-            </h3>
+                
+            </footer>
+            {% endwith %}
+            
             <ul>
                 {% for note in task.task_notes.all %}
                 <li>
@@ -70,10 +171,71 @@
                 </li>
                 {% endfor %}
             </ul>
+
+
+
         </article>
         {% endfor %}
     </section>
 
 </div>
+
+
+
+<!-- https://flowbite.com/docs/components/modal/ -->
+<!-- https://stackoverflow.com/questions/66839202/make-tailwindcss-modal-dialog-with-scrolling-content -->
+
+<section class="" x-data="{visible:false}">
+
+<!-- Modal toggle -->
+<button @click="visible = true"
+        data-modal-target="default-modal" data-modal-toggle="default-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+    Toggle modal
+  </button>
+  
+  <!-- Main modal -->
+    <div  x-show="visible"
+        
+  
+        id="default-modal" tabindex="-1" aria-hidden="true" class="bg-gray-600 bg-opacity-50 overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 flex justify-center items-center w-full md:inset-0 h-full max-h-full">
+      <div @click.outside="visible = false"
+            class="relative p-4 w-full max-w-2xl max-h-full">
+          <!-- Modal content -->
+          <div class="relative mx-auto flex flex-col  max-h-[calc(100vh-2rem)]   overflow-y-auto     bg-white rounded-lg shadow dark:bg-gray-700">
+              <!-- Modal header -->
+              <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                  <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                      Terms of Service
+                  </h3>
+                  <!-- close button-->
+                  <button @click="visible = false"
+                            type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                      <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                      </svg>
+                      <span class="sr-only">Close modal</span>
+                  </button>
+              </div>
+              <!-- Modal body --> 
+              <div class="flex-auto overflow-y-auto relative p-4">
+                <p>This is some placeholder content to show the scrolling behavior for modals. We use repeated line breaks to demonstrate how content can exceed minimum inner height, thereby showing inner scrolling. When content becomes longer than the predefined max-height of modal, content will be cropped and scrollable within the modal.</p>
+                <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+                <p>This content should appear at the bottom after you scroll.</p>
+              </div>
+              <!-- Modal footer -->
+              <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <form class="w-full" action="" method="post">
+                    <textarea class="w-full mb-2 p-2 rounded-lg border-solid border-2 border-b-gray-200" name="tasknote" placeholder="Add a Note" id="" cols="" rows="3"></textarea>
+                    <button data-modal-hide="default-modal" type="button" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">I accept</button>
+                </form>
+
+              </div>
+          </div>
+      </div>
+    </div>
+  
+</section>
+
+
 {% endblock main %}
     
