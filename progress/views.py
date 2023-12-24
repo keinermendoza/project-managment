@@ -90,16 +90,56 @@ def admin_project_view(request, project_id):
 
 @login_required
 def create_project_note(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+
     if request.method == "POST":
-        project = get_object_or_404(Project, id=project_id)
         form = NoteForm(request.POST)
         if form.is_valid():
             message = form.cleaned_data['note']
             print('MESSAGE', message)
             new_note = ProjectNote.objects.create(user=request.user, project=project, message=message)
             return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
-        return HttpResponseBadRequest
-    return HttpResponseNotAllowed
+        return HttpResponse('You need to put something as note message', status=400)
+
+    return HttpResponseNotAllowed('')
+
         
+
+
+@login_required
 def create_task_note(request, task_id):
     pass
+
+
+@login_required
+def edit_delete_project_note(request, note_id):
+    note = get_object_or_404(ProjectNote, id=note_id, user=request.user)
+
+    if request.method == "DELETE":
+        project = note.project
+        note.delete()
+
+        remaind_notes = project.project_notes.all()
+        return render(request, "progress/snippets/notelist.html", {"object_notes_all": remaind_notes})
+
+    if request.method == "PUT":
+        note = request.body.get('note')
+        form = NoteForm(note)
+        if form.is_valid():
+            note.message = form.cleaned_data['note']
+            note.save()
+            all_notes = note.project.project_notes.all()
+            return render(request, "progress/snippets/notelist.html", {"object_notes_all": all_notes})
+        return HttpResponse('You need to put something as note message', status=400)
+    return HttpResponseNotAllowed('')
+    
+
+
+
+@login_required
+def edit_delete_task_note(request, note_id):
+    note = get_object_or_404(TaskNote, id=note_id, user=request.user)
+    if request.method == "DELETE":
+        pass
+    if request.method == "PUT":
+        pass

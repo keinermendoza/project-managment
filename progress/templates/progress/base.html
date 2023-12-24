@@ -9,14 +9,18 @@
     <!-- alpine -->
     <script defer src="{% static 'js/alpine.js' %}"></script>
 
-    <!-- alpine store  -->
-    <script src="{% static 'progress/js/alpinestore.js' %}"></script>
+    <!-- Sweet Alert -->
+    <script defer src="{% static 'js/sweetAlert.js' %}"></script>
+   
 
     <!-- htmx -->
-    <script defer src="{% static 'js/htmx.js' %}"></script>
+    <script src="{% static 'js/htmx.js' %}"></script>
 
     <!-- tailwind -->
     <link rel="stylesheet" href="{% static 'tailwind/tail.css' %}">
+
+     <!-- alpine store  -->
+     <script src="{% static 'progress/js/alpinestore.js' %}"></script>
     
     <title>Managment - {% block title %}{% endblock title %}</title>
 </head>
