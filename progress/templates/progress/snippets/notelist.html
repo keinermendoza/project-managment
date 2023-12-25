@@ -6,14 +6,17 @@
 
         <div class="flex gap-2 place-self-start">
             <!-- trash -->
-            <div hx-delete="{% url 'progress:edit_delete_project_note' note.id %}"
+            <div 
                 hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                 hx-confirm="Are you sure you want to delete the note {{note.name}}?"
                 @delete-note="--noteCount"
 
                 {% if project_notes %}
-                hx-target="#project_notes_list"
+                    hx-delete="{% url 'progress:delete_project_note' note.id %}"
+                    hx-target="#project_notes_list"
                 {% else %}
+                    hx-delete="{% url 'progress:delete_task_note' note.id %}"
+                    hx-target="#task_notes_list_{{note.task.id}}"
                 {% endif %}
 
 

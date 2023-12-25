@@ -44,6 +44,12 @@
            
 
             <!-- Modal body --> 
+            {% comment %} 
+                i use the next id's for the hx-target
+                for insert partials of progress/snippets/notelist.html
+                when creating, updating and deleting TaskNotes and ProjectNotes
+            {% endcomment %}
+            
             <div class="target-note-list flex-auto overflow-y-auto relative p-4"
                 :class="editing ? 'modale-list-cover' : '' "
             {% if project_notes %}
@@ -65,6 +71,8 @@
                 
                 <!-- CREATE NOTE -->
                 <form x-show="editing == false"
+                    @upp-note-counter="++noteCount"
+
                     class="form-notes w-full" method="post"
                     {% if project_notes %}
                         hx-target="#project_notes_list"
@@ -86,22 +94,28 @@
 
                     {% csrf_token %}
                     <textarea class="w-full mb-2 p-2 rounded-lg border-solid border-2 border-b-gray-200" name="note" placeholder="Add a Note" id="" cols="" rows="3"></textarea>
-                    <input type="hidden" name="uppNoteCount" @click="++noteCount">
                     <button type="submit" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >Create Note</button>
                 </form>
 
                 <!-- EDIT NOTE -->
-                <!-- uses vanilla javascript for send -->
+                <!-- the differences are the htmx method "PUT" and
+                    the precense of an aditional input "noteId" -->
                 <form x-show="editing"
+                    @set-editing-false="editing = false" 
+                    
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
                     action="{% url 'progress:edit_delete_project_note' 0 %}"
 
 
                     {% if project_notes %}
                         hx-target="#project_notes_list"
+                        action="{% url 'progress:create_project_note' object.id %}"
+                        hx-put="{% url 'progress:create_project_note' object.id %}"
                     {% else %}
                         hx-target="#task_notes_list_{{object.id}}"
+                        action="{% url 'progress:create_task_note' object.id %}"
+                        hx-put="{% url 'progress:create_task_note' object.id %}"
                     {% endif %}
 
 
@@ -117,21 +131,6 @@
                     <button type="submit" class="float-right text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
                     >Save Note</button>
                 </form>
-
-                {% comment %}
-                hx-on::after-request="console.log(e.detail.elt,  e.detail.successful)"
-                
-                
-                
-                htmx.on("htmx:afterRequest", function(evt) {
-                    console.log("The element that dispatched the request: ", evt.detail.elt);
-                    console.log("The XMLHttpRequest: ", evt.detail.xhr);
-                    console.log("The target of the request: ", evt.detail.target);
-                    console.log("The configuration of the AJAX request: ", evt.detail.requestConfig);
-                    console.log("The event that triggered the request: ", evt.detail.requestConfig.triggeringEvent);
-                    console.log("True if the response has a 20x status code or is marked detail.isError = false in the htmx:beforeSwap event, else false: ", evt.detail.successful);
-                    console.log("true if the response does not have a 20x status code or is marked detail.isError = true in the htmx:beforeSwap event, else false: ", evt.detail.failed);
-                }); {% endcomment %}
 
             </div>
 

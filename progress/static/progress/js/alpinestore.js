@@ -27,26 +27,28 @@ document.addEventListener('alpine:init', () => {
                 
                 // update form data
                 form.note.value = noteMessage;
-                const pattern = /\/\d+\//;
-                const url = form.action
-                const newUrl = url.replace(pattern, `/${noteId}/`)
-                const HTMXheaders = form.getAttribute('hx-headers')
+                form.noteId.value = noteId;
 
-                form.addEventListener('htmx:beforeRequest', function Stop(e) {
-                    e.preventDefault()
-                    e.target.removeEventListener('htmx:beforeRequest', Stop) 
+                // const pattern = /\/\d+\//;
+                // const url = form.action
+                // const newUrl = url.replace(pattern, `/${noteId}/`)
+                // const HTMXheaders = form.getAttribute('hx-headers')
 
-                    htmx.ajax('PUT', `${newUrl}`, {source: e.target})
-                    // console.log(form)
-                    // const newForm = new FormData(form)
-                    // fetch(newUrl, {
-                    //     method: 'PUT',
-                    //     body: newForm,
-                    //     headers: {
-                    //         HTMXheaders
-                    //       },
-                    // })
-                })
+                // form.addEventListener('htmx:beforeRequest', function Stop(e) {
+                //     e.preventDefault()
+                //     e.target.removeEventListener('htmx:beforeRequest', Stop) 
+
+                //     htmx.ajax('PUT', `${newUrl}`, {source: e.target})
+                //     // console.log(form)
+                //     // const newForm = new FormData(form)
+                //     // fetch(newUrl, {
+                //     //     method: 'PUT',
+                //     //     body: newForm,
+                //     //     headers: {
+                //     //         HTMXheaders
+                //     //       },
+                //     // })
+                // })
 
                
             })
@@ -59,6 +61,7 @@ document.addEventListener('alpine:init', () => {
 
 
 document.addEventListener("htmx:confirm", function(e) {
+    // if deleting a note
     if (Array.from(e.target.classList).includes('delete-note'))  { 
         e.preventDefault()
   
@@ -82,10 +85,12 @@ document.addEventListener("htmx:confirm", function(e) {
 
 // https://www.reddit.com/r/htmx/comments/10hu6wp/how_to_know_which_event_was_triggered/
 htmx.on("htmx:afterRequest", (e) => {
+// if creating a Note 
 if (Array.from(e.target.classList).includes("form-notes")) {
     if (e.detail.successful) {
         e.target.note.value = ''
-        e.target.uppNoteCount.click() // this is really tricky
+        const event = new CustomEvent("upp-note-counter");
+        e.target.dispatchEvent(event)
 
         Swal.fire({
             icon: "success",
@@ -108,6 +113,35 @@ if (Array.from(e.target.classList).includes("form-notes")) {
           });
 
     }
-}
+} 
+// if editing a Note
+else if (Array.from(e.target.classList).includes("form-edit-notes")) {
+    if (e.detail.successful) {
+        e.target.note.value = ''
+        const event = new CustomEvent("set-editing-false");
+        e.target.dispatchEvent(event)
+
+        Swal.fire({
+            icon: "success",
+            title: "Note Updated",
+            showConfirmButton: false,
+            timer: 1500
+          });
+
+    } else {
+
+        console.log(e)
+        console.log(e.target)
+
+        Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: e.detail.xhr.responseText,
+            showConfirmButton: false,
+            timer: 2500
+          });
+
+    }
+} 
 
 });

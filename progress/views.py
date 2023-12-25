@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
-from django.http.response import HttpResponseForbidden, HttpResponseBadRequest, HttpResponseNotAllowed
-from django.http import HttpResponse
+from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed
+from django.http import HttpResponse, QueryDict
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -82,7 +82,6 @@ def project_detail(request, project_id):
     return render(request, "progress/project_detail.html", {'project':project, 'active_section':''})
 
 
-
 @staff_member_required
 def admin_project_view(request, project_id):
     project = get_object_or_404(Project, id=project_id)
@@ -90,29 +89,37 @@ def admin_project_view(request, project_id):
 
 @login_required
 def create_project_note(request, project_id):
+    """handles creation and edition of ProjectNote
+    returns a partial with the list of Notes for the Project"""
     project = get_object_or_404(Project, id=project_id)
 
     if request.method == "POST":
         form = NoteForm(request.POST)
         if form.is_valid():
             message = form.cleaned_data['note']
-            print('MESSAGE', message)
             new_note = ProjectNote.objects.create(user=request.user, project=project, message=message)
             return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
+        return HttpResponse('You need to put something as note message', status=400)
+    
+
+    if request.method == "PUT":
+        data = QueryDict(request.body)
+        note = get_object_or_404(ProjectNote, id=data.get('noteId'), user=request.user)
+        form = NoteForm(data=data)
+        if form.is_valid():
+            note.message = form.cleaned_data.get('note')
+
+            note.save()
+            all_notes = note.project.project_notes.all()
+            return render(request, "progress/snippets/notelist.html", {"object_notes_all": all_notes})
         return HttpResponse('You need to put something as note message', status=400)
 
     return HttpResponseNotAllowed('')
 
-        
-
-
 @login_required
-def create_task_note(request, task_id):
-    pass
-
-
-@login_required
-def edit_delete_project_note(request, note_id):
+def delete_project_note(request, note_id):
+    """handles deletion of ProjectNote
+    returns a partial with the list of remainder Notes for the Project"""
     note = get_object_or_404(ProjectNote, id=note_id, user=request.user)
 
     if request.method == "DELETE":
@@ -122,24 +129,53 @@ def edit_delete_project_note(request, note_id):
         remaind_notes = project.project_notes.all()
         return render(request, "progress/snippets/notelist.html", {"object_notes_all": remaind_notes})
 
-    if request.method == "PUT":
-        note = request.body.get('note')
-        form = NoteForm(note)
+   
+    return HttpResponseNotAllowed('')
+
+
+@login_required
+def create_task_note(request, task_id):
+    """handles creation and edition of TaskNote
+    returns a partial with the list of Notes for the Task"""
+
+    task = get_object_or_404(Task, id=task_id)
+
+    if request.method == "POST":
+        form = NoteForm(request.POST)
         if form.is_valid():
-            note.message = form.cleaned_data['note']
+            message = form.cleaned_data['note']
+            new_note = TaskNote.objects.create(user=request.user, task=task, message=message)
+            return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
+        return HttpResponse('You need to put something as note message', status=400)
+    
+
+    if request.method == "PUT":
+        data = QueryDict(request.body)
+        note = get_object_or_404(TaskNote, id=data.get('noteId'), user=request.user)
+        form = NoteForm(data=data)
+        if form.is_valid():
+            note.message = form.cleaned_data.get('note')
+
             note.save()
-            all_notes = note.project.project_notes.all()
+            all_notes = note.task.task_notes.all()
             return render(request, "progress/snippets/notelist.html", {"object_notes_all": all_notes})
         return HttpResponse('You need to put something as note message', status=400)
+
     return HttpResponseNotAllowed('')
-    
 
 
 
 @login_required
-def edit_delete_task_note(request, note_id):
+def delete_task_note(request, note_id):
+    """handles creation and edition of TaskNote
+    returns a partial with the list of remainder Notes for the Task"""
     note = get_object_or_404(TaskNote, id=note_id, user=request.user)
+   
     if request.method == "DELETE":
-        pass
-    if request.method == "PUT":
-        pass
+        task = note.task
+        note.delete()
+
+        remaind_notes = task.task_notes.all()
+        return render(request, "progress/snippets/notelist.html", {"object_notes_all": remaind_notes})
+   
+    return HttpResponseNotAllowed('')

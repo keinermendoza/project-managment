@@ -13,8 +13,8 @@ urlpatterns = [
     path('project/create-note/<int:project_id>/', views.create_project_note, name="create_project_note"),
     path('task/create-note/<int:task_id>/', views.create_task_note, name="create_task_note"),
 
-    path('project/note/<int:note_id>/', views.edit_delete_project_note, name="edit_delete_project_note"),
-    path('task/note/<int:note_id>/', views.edit_delete_task_note, name="edit_delete_task_note"),
+    path('project/note/<int:note_id>/', views.delete_project_note, name="delete_project_note"),
+    path('task/note/<int:note_id>/', views.delete_task_note, name="delete_task_note"),
 
 
     path('', views.home, name='projects_home'),
