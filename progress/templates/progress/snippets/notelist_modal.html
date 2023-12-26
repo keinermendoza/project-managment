@@ -59,8 +59,10 @@
             {% endif %}   
             >
                 
-                {% if note_count > 0 %}
-                    {% include "progress/snippets/notelist.html" with object_notes_all=object_notes_all project_notes=project_notes %}
+                {% if project_notes %}
+                    {% include "progress/snippets/project_note_list.html" with object_notes_all=object_notes_all %}
+                {% else %}
+                    {% include "progress/snippets/task_note_list.html" with object_notes_all=object_notes_all %}
                 {% endif %}
 
             </div>
@@ -105,7 +107,6 @@
                     @set-editing-false="editing = false" 
                     
                     hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
-                    action="{% url 'progress:edit_delete_project_note' 0 %}"
 
 
                     {% if project_notes %}

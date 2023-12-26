@@ -1,5 +1,6 @@
 from django.urls import path 
 from . import views
+from django.views.generic import TemplateView
 
 app_name = 'progress'
 urlpatterns = [
@@ -17,5 +18,5 @@ urlpatterns = [
     path('task/note/<int:note_id>/', views.delete_task_note, name="delete_task_note"),
 
 
-    path('', views.home, name='projects_home'),
+    path('', views.projects_home, name='projects_home'),
 ]

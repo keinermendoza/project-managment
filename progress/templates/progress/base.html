@@ -26,16 +26,25 @@
 </head>
 
 <body class="relative min-h-screen mx-auto bg-slate-200"
-    hx-boost="true"
+    
     x-init="$store.section.updateActive('{{active_section}}')">
     
 
-    <header class="w-full sticky top-0 z-10 bg-sky-700">
+    <header class="w-full sticky top-0 z-10 bg-sky-700 border-b-4 border-sky-400">
         <div class="max-w-[2000px] mx-auto flex justify-between content-center p-2 lg:p-5"
             x-data="{openMobile : false}">
 
             <!-- brand -->
-            <h1 class="grid place-content-center font-semibold text-xl">Progress</h1>
+            <div class="grid place-content-center">
+                <h1 class=" font-semibold text-xl">Progress</h1>
+                <p class="text-sm">
+                    {% if user.is_authenticated %}
+                    Welcome {{user.username}}!
+                    {% else %}
+                    Not logged in
+                    {% endif %}
+                </p>
+            </div>
 
             <!-- sections visible md/lg -->
             <nav class="relative d-none md:flex lg:hidden text-sm content-center  justify-around gap-2 p-2 ps-10 border-2 border-solid border-slate-300 rounded-md">
@@ -43,14 +52,16 @@
                
                 {% include "progress/snippets/btn_section.html" with section_name="all"  %}
                 {% include "progress/snippets/btn_section.html" with section_name="public"  %}
+            {% if user.is_authenticated %}                
                 {% include "progress/snippets/btn_section.html" with section_name="private"  %}
+            {% endif %}
             </nav>
 
             <!-- register and login btns visible from md -->
             <nav class="d-none md:flex self-center text-sm gap-2">
 
                 <!-- HOME visible only md/lg -->
-                <a class="d-none md:flex border-solid border-2 lg:hidden p-2 rounded bg-sky-400"
+                <a class="d-none md:flex  lg:hidden p-2 rounded bg-sky-400"
                 :class="{'bg-yellow-500  border-yellow-300' : $store.section.isActive('home')}"
                 @click="$store.section.updateActive('home')"
                 hx-target="#main"
@@ -58,14 +69,25 @@
                 href="{% url 'progress:projects_home' %}"
                 >Home</a>
 
-                <a class="p-2 rounded bg-sky-400">Register</a>
-                <a class="p-2 rounded bg-sky-400">Login</a>
-                </ul>
+            {% if user.is_authenticated %}
+                <a href="{% url 'account:logout_view' %}" class="p-2 rounded bg-sky-400">Logout</a>
+
+            {% else %}
+                <a hx-get="{% url 'account:register_view' %}" 
+                    hx-target="#main"
+                    hx-push-url="true"
+                    href="{% url 'account:register_view' %}" class="p-2 rounded bg-sky-400">Register</a>
+                <a hx-get="{% url 'account:login_view' %}" 
+                    hx-target="#main"
+                    hx-push-url="true"
+                    href="{% url 'account:login_view' %}" class="p-2 rounded bg-sky-400">Login</a>
+
+            {% endif %}
             </nav>
 
             <!-- mobile btn visible until md -->
             <!-- ALPINE handle mobile menu using object openMobile  -->
-            <button class="md:hidden p-2 rounded bg-sky-400 hover:bg-sky-500"
+            <button class="md:hidden place-self-center p-3 rounded bg-sky-400 hover:bg-sky-500"
                 @click="openMobile = ! openMobile"
                 @click.outside="openMobile = false"
                 x-on:resize.window="openMobile = false">
@@ -77,19 +99,71 @@
 
             <!-- mobile menu cover all the page when active -->
             <section id="mobile-menu"
-                class="d-none fixed left-0 top-[47px] overflow-hidden  bg-opacity-70 bg-sky-600 w-full text-5xl 
+                class="d-none fixed left-0 top-16 pt-20 overflow-hidden  bg-opacity-70 bg-sky-600 w-full text-2xl 
                         flex-col justify-center origin-top animate-open-menu"
                 
                 :class="{'flex' : openMobile, 'd-none' : !openMobile}">
             
                 <nav aria-label="mobile" 
-                    class=" flex flex-col min-h-screen items-center py-8">
-                    
-                    {% include "progress/snippets/btn_section.html" with section_name="home" mb_2=True strprojects=True %}
-                    {% include "progress/snippets/btn_section.html" with section_name="all" mb_2=True strprojects=True %}
+                    class="flex flex-col gap-y-10 min-h-screen text-center">
+                    <div class="">
+                        {% include "progress/snippets/btn_section.html" with section_name="home" mb_2=True strprojects=True %}
+                    </div>
+                    <div class="">
                     {% include "progress/snippets/btn_section.html" with section_name="public" mb_2=True strprojects=True %}
+                    </div>
+                    <div class="">
+                    {% include "progress/snippets/btn_section.html" with section_name="all" mb_2=True strprojects=True %}
+                    </div>
+                {% if user.is_authenticated %}                
+                    <div class="">
                     {% include "progress/snippets/btn_section.html" with section_name="private" mb_2=False strprojects=True %}
-                 
+                    </div>
+
+
+
+                    <div>
+                        <a href="{% url 'account:logout_view' %}" class="p-2 rounded  border-solid border-2 bg-slate-100 shadow-sm hover:bg-yellow-300">Logout</a>
+                    </div>
+
+                {% else %}
+                    <div>
+                        <a hx-get="{% url 'account:register_view' %}" 
+                        hx-target="#main"
+                        hx-push-url="true"
+                        href="{% url 'account:register_view' %}" class="p-2 rounded  border-solid border-2 bg-slate-100 shadow-sm hover:bg-yellow-300">Register</a>
+                    </div>
+
+                    <div>
+                        <a hx-get="{% url 'account:login_view' %}" 
+                            hx-target="#main"
+                            hx-push-url="true"
+                            href="{% url 'account:login_view' %}" class="p-2 rounded  border-solid border-2 bg-slate-100 shadow-sm hover:bg-yellow-300">Login</a>
+                    </div>
+                {% endif %}
+                <!-- self promotion -->
+                <div class="relative top-10">
+                    <h2 class="place-self-center text-2xl font-semibold text-white">Contact me on</h2>
+                    <ul class="mt-5 flex justify-center gap-5">
+                        <li>
+                            <a href="https://www.linkedin.com/in/keiner-asael-mendoza-andrade-988ab594/" target="_blank">
+                                <img class="w-10 h-full bg-white rounded p-1 hover:bg-yellow-500" src="{% static 'progress/img/linkedin.svg' %}" alt="linkedin">
+        
+                            </a>
+                        </li>
+        
+                        <li>
+                            <a href="https://github.com/keinermendoza" target="_blank">
+                                <img class="w-10 h-full bg-white rounded p-1 hover:bg-yellow-500" src="{% static 'progress/img/github.svg' %}" alt="github">
+                            </a>
+                        </li>
+    
+                    </ul>
+                    <p class="mt-3 text-sm">You can se More of my works in</p>
+                    <p><a class="text-white text-xl font-semibold" href="https://keinermendoza.com" target="_blank">keinermendoza.com</a></p>
+                </div>
+    
+                                 
                 </nav>
 
             </section>
@@ -99,7 +173,7 @@
     <main class="max-w-[2000px] mx-auto px-2 mt-6" >
 
         <!-- left ASIDE navbar visible from lg -->
-        <aside class="sticky top-[84px] float-left d-none lg:block w-[350px] mt-[-1rem] mr-5 bg-sky-700 rounded p-2">
+        <aside class="sticky top-24 float-left d-none lg:block w-[350px] mt-[-1rem] mr-5 bg-sky-700 rounded p-2">
             <nav class="flex flex-col content-center text-sm xl:text-xl">
 
                 <h2 class="text-2xl font-semibold text-slate-100  my-2">Sections</h2>
@@ -107,14 +181,15 @@
                 {% include "progress/snippets/btn_section.html" with section_name="home" mb_2=True %}
                 {% include "progress/snippets/btn_section.html" with section_name="all" mb_2=True strprojects=True %}
                 {% include "progress/snippets/btn_section.html" with section_name="public" mb_2=True strprojects=True %}
+            {% if user.is_authenticated %}
                 {% include "progress/snippets/btn_section.html" with section_name="private" mb_2=False strprojects=True %}
-                
+            {% endif %}
             </nav>
                 
         </aside>
 
         <!-- main content --> 
-        <div class="w-auto pt-2 pb-14 md:pb-20" id="main">
+        <div class="grid w-auto pt-2 pb-20 md:pb-28" id="main">
 
             {% block main %}
             {% endblock main %}
@@ -123,13 +198,27 @@
 
     <footer class="absolute bottom-0 w-full bg-sky-700">
         <section class="max-w-[2000px] mx-auto flex justify-between content-center p-2 lg:p-5">
+            <div class="flex content-center gap-3">
+                <h2 class="place-self-center text-2xl font-semibold text-white">Contact me on</h2>
+                <ul class="grid grid-cols-2 gap-3">
+                <li>
+                    <a href="https://www.linkedin.com/in/keiner-asael-mendoza-andrade-988ab594/" target="_blank">
+                        <img class="w-10 h-full bg-white rounded p-1 hover:bg-yellow-500" src="{% static 'progress/img/linkedin.svg' %}" alt="linkedin">
 
-            <h2>Contact me on</h2>
-            <ul>
-                <li></li>
-                <li></li>
-                <li></li>
+                    </a>
+                </li>
+
+                <li>
+                    <a href="https://github.com/keinermendoza" target="_blank">
+                        <img class="w-10 h-full bg-white rounded p-1 hover:bg-yellow-500" src="{% static 'progress/img/github.svg' %}" alt="github">
+                    </a>
+                </li>
+
             </ul>
+            </div>
+            <div class="place-self-center d-none md:block">
+                <p class="text-sm"> <span class="relative -left-2">You can se More of my works in</span>  <a class="text-white hover:text-yellow-500 text-xl font-semibold" href="https://keinermendoza.com" target="_blank">keinermendoza.com</a></p>
+            </div>
         </section>
     </footer>
         

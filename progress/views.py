@@ -4,11 +4,12 @@ from django.http import HttpResponse, QueryDict
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django_htmx.http import retarget
 
 from .models import Task, Project, TaskNote, ProjectNote
 from .forms import NoteForm
 
-def home(request):
+def projects_home(request):
 
     if request.htmx:
         template_name = 'progress/snippets/home.html'
@@ -79,8 +80,12 @@ def project_detail(request, project_id):
     else: 
         if not request.user.is_authenticated or request.user != project.user:
             return HttpResponseForbidden
-    return render(request, "progress/project_detail.html", {'project':project, 'active_section':''})
-
+        
+    response = render(request, 'progress/project_detail.html', {'project':project, 'active_section':''})
+    
+    if request.htmx:
+        return retarget(response, "body")
+    return response
 
 @staff_member_required
 def admin_project_view(request, project_id):
@@ -98,7 +103,7 @@ def create_project_note(request, project_id):
         if form.is_valid():
             message = form.cleaned_data['note']
             new_note = ProjectNote.objects.create(user=request.user, project=project, message=message)
-            return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
+            return render(request, "progress/snippets/project_note_list.html", {"object_notes_all": [new_note]})
         return HttpResponse('You need to put something as note message', status=400)
     
 
@@ -111,7 +116,7 @@ def create_project_note(request, project_id):
 
             note.save()
             all_notes = note.project.project_notes.all()
-            return render(request, "progress/snippets/notelist.html", {"object_notes_all": all_notes})
+            return render(request, "progress/snippets/project_note_list.html", {"object_notes_all": all_notes})
         return HttpResponse('You need to put something as note message', status=400)
 
     return HttpResponseNotAllowed('')
@@ -127,7 +132,7 @@ def delete_project_note(request, note_id):
         note.delete()
 
         remaind_notes = project.project_notes.all()
-        return render(request, "progress/snippets/notelist.html", {"object_notes_all": remaind_notes})
+        return render(request, "progress/snippets/project_note_list.html", {"object_notes_all": remaind_notes})
 
    
     return HttpResponseNotAllowed('')
@@ -145,7 +150,7 @@ def create_task_note(request, task_id):
         if form.is_valid():
             message = form.cleaned_data['note']
             new_note = TaskNote.objects.create(user=request.user, task=task, message=message)
-            return render(request, "progress/snippets/notelist.html", {"object_notes_all": [new_note]})
+            return render(request, "progress/snippets/task_note_list.html", {"object_notes_all": [new_note]})
         return HttpResponse('You need to put something as note message', status=400)
     
 
@@ -158,7 +163,7 @@ def create_task_note(request, task_id):
 
             note.save()
             all_notes = note.task.task_notes.all()
-            return render(request, "progress/snippets/notelist.html", {"object_notes_all": all_notes})
+            return render(request, "progress/snippets/task_note_list.html", {"object_notes_all": all_notes})
         return HttpResponse('You need to put something as note message', status=400)
 
     return HttpResponseNotAllowed('')
@@ -176,6 +181,6 @@ def delete_task_note(request, note_id):
         note.delete()
 
         remaind_notes = task.task_notes.all()
-        return render(request, "progress/snippets/notelist.html", {"object_notes_all": remaind_notes})
+        return render(request, "progress/snippets/task_note_list.html", {"object_notes_all": remaind_notes})
    
     return HttpResponseNotAllowed('')
