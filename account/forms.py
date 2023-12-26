@@ -13,10 +13,8 @@ class CustomUserChangeForm(UserChangeForm):
         fields = ("email",)
 
 class LoginForm(forms.Form):
-    email = forms.EmailField()
+    email = forms.EmailField(widget=forms.TextInput(attrs={'autofocus': True}))
     password = forms.CharField(widget=forms.PasswordInput)
 
-class RegisterForm(forms.Form):
+class RegisterForm(LoginForm):
     username = forms.CharField(max_length=100) 
-    email = forms.EmailField()
-    password = forms.CharField(widget=forms.PasswordInput)

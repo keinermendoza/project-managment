@@ -49,7 +49,7 @@ def register_view(request):
         if form.is_valid():
             cd = form.cleaned_data
             
-            # if no user with this email exists add error message 
+            # if user with this email exists add error message 
             if User.objects.filter(email=cd["email"]).exists():
                 form.add_error("email", "Sorry. There is a user registred with this email")
 
@@ -62,8 +62,8 @@ def register_view(request):
                 # return HttpResponseLocation(reverse('progress:projects_home'), target="#main")
                 return redirect(reverse('progress:projects_home'))
             
-        return render(request, "account/register.html", {"form":form})
-        # return retarget(response, "#main")
+        response = render(request, "account/partials/register.html", {"form":form})
+        return retarget(response, "#main")
 
 def logout_view(request):
     logout(request)

@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
 from django.http.response import HttpResponseForbidden, HttpResponseNotAllowed
 from django.http import HttpResponse, QueryDict
 from django.contrib.admin.views.decorators import staff_member_required
@@ -10,14 +11,21 @@ from .models import Task, Project, TaskNote, ProjectNote
 from .forms import NoteForm
 
 def projects_home(request):
+    template_name = 'progress/home.html'
+    title = False
 
     if request.htmx:
-        template_name = 'progress/snippets/home.html'
-        title = True
-    else:
-        template_name = 'progress/home.html'
-        title = False
+        if request.htmx.current_url not in [request.build_absolute_uri(reverse('account:login_view')),
+                                    request.build_absolute_uri(reverse('account:register_view'))]:
 
+            template_name = 'progress/snippets/home.html'
+            title = True
+
+        # handeling LOGIN AND REGISTER redirection for get the entire page
+        else:
+            response = render(request, template_name, {'active_section':'home'})        
+            return retarget(response, 'body')
+        
     return render(request, template_name, {'active_section':'home', 'title':title})
 
 def projects_all(request):
@@ -28,7 +36,7 @@ def projects_all(request):
     
     # get the private projects of this user
     if request.user.is_authenticated:
-        user_projects = Project.objects.filter(user=request.user, public=False)
+        user_projects = Project.objects.filter(users__in=[request.user], public=False)
         if user_projects is not None:
             projects = projects | user_projects
 
@@ -57,7 +65,7 @@ def projects_public(request):
 def projects_private(request):
     """returns the user private projects"""
 
-    projects = Project.objects.filter(user=request.user, public=False)
+    projects = Project.objects.filter(users__in=[request.user], public=False)
 
     if request.htmx:
         template_name = 'progress/snippets/project_list.html'

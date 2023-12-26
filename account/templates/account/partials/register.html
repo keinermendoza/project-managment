@@ -13,18 +13,31 @@
 
     <div>
         <label class="block text-xl" for="{{ form.email.id_for_label }}">Email:</label>
+        {% for error in form.email.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
         {% render_field form.email class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
     </div>
 
     <div>
         <label class="block text-xl" for="{{ form.username.id_for_label }}">Username:</label>
+        {% for error in form.username.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
         {% render_field form.username class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
     </div>
     
     <div>
         <label class="block text-xl" for="{{ form.password.id_for_label }}">Password:</label>
+        {% for error in form.password.errors %}
+            <p class="text-red-200">{{ error }}</p>
+        {% endfor %}
         {% render_field form.password class="w-full bg-gray-400 border-2 border-black rounded py-1 px-2 text-black" %}
     </div>
+
+    {% for error in form.non_field_errors %}
+    <p class="text-red-200">{{ error }}</p>
+    {% endfor %}
 
     
 

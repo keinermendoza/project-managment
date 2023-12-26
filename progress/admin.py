@@ -79,5 +79,6 @@ class TaskAdmin(admin.ModelAdmin):
 class ProjectAdmin(admin.ModelAdmin):
     save_on_top = True
     list_display = ['name', project_view, 'importance', 'status', 'created', ]
+    filter_horizontal = ['users']
     search_fields = ['name', 'description']
     inlines = [ProjectNoteAdmin, TaskStackedAdmin]
