@@ -28,28 +28,6 @@ document.addEventListener('alpine:init', () => {
                 // update form data
                 form.note.value = noteMessage;
                 form.noteId.value = noteId;
-
-                // const pattern = /\/\d+\//;
-                // const url = form.action
-                // const newUrl = url.replace(pattern, `/${noteId}/`)
-                // const HTMXheaders = form.getAttribute('hx-headers')
-
-                // form.addEventListener('htmx:beforeRequest', function Stop(e) {
-                //     e.preventDefault()
-                //     e.target.removeEventListener('htmx:beforeRequest', Stop) 
-
-                //     htmx.ajax('PUT', `${newUrl}`, {source: e.target})
-                //     // console.log(form)
-                //     // const newForm = new FormData(form)
-                //     // fetch(newUrl, {
-                //     //     method: 'PUT',
-                //     //     body: newForm,
-                //     //     headers: {
-                //     //         HTMXheaders
-                //     //       },
-                //     // })
-                // })
-
                
             })
             
@@ -74,9 +52,6 @@ document.addEventListener("htmx:confirm", function(e) {
             const event = new CustomEvent("delete-note");
             e.target.dispatchEvent(event)
             e.detail.issueRequest(true); // this continue the request
-
-            // const event = new CustomEvent("deleterow", {detail : {itemId : e.target.dataset.rowid}});
-            // window.dispatchEvent(event);
 
         } 
       });

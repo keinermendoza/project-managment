@@ -1,25 +1,118 @@
 # Progress Managment
 This is a management tool, focused on communicating project progress and receiving feedback.
 
-## Admin
+- - -
+## **Admin**
 
-las acciones importantes como crear proyectos, tareas y editar permisos de usuarios son posibles solo atraves del admin.
+Important actions such as creating projects, tasks and editing user permissions are possible only through the admin.
 
-la edicion se hace atraves de los formularios integrados de django, la configuracion esta en el admin.py de la app progress.
+The editing is done through the integrated Django forms, the configuration for admin is in:
 
-### Tareas
+```
+-> progress/admin.py
+```
 
-las tareas tienen un periodo de realizacion estimado que debe ser declarado al crearse. Cuando una tarea es marcada como "Working on" la propiedad "get_time_to_finish" es calculada mostrando el tiempo en el que la tarea deberia estar lista, en caso de que el estatus de la tarea sea marcada como completed o como waiting el valor de esta propiedad sera seteado a null.  
+### **Tasks**
 
-### Privacidad de un Proyecto
+Tasks have an estimated completion period that must be declared when created. When a task is marked as **"Working on in"** the property **"get_time_to_finish"** is calculated showing the time in which the task should be ready, in case the status of the task is marked as completed or as waiting the value of this property will be set to None.
 
-el modelo de proyecto tiene una propiedad "public" que permite compartir un projecto con todos los usuarios registrados sin importar si estos estan asignados a dicho projecto, si esta propiedad es seteada como False solo los usuarios asignados al proyecto podran interactuar con el
+### **Project Privacy**
 
-### Notas
-Al crear una nota desde el admin no es necesario marcar el usuario, el usuario actual es detectado. si se edita una nota se mantiene el usuario original.
+The **Project** model has a **"Public"** property that allows sharing a project with all registered users regardless of whether they are assigned to said project. If this property is set to False, only users assigned to the project will be able to interact with it.
 
-### Views
+### **Notes**
 
-Agregué una vista personalizada al admin que permite visualizar la informacion del proyecto de forma unificada. ésta esta registrada dentro de la aplicacion progress.
+When creating a note from the admin it is not necessary to mark the user, the current user is detected. If a note is edited, the original user is maintained.
 
-## Stack
+### **Views**
+
+I added a custom view to the admin that allows you to view the project information in a unified way. This is registered within the progress application.
+- - -
+
+## **Technologies Stack**
+
++ [Django](#Django)
++ [Alpinejs](#alpinejs)
++ [HTMX](#htmx)
++ Tailwindcss
+
+### **Django**
+
+The Backend is completely managed by django, using the django template engine to generate HTML on the server, no Json responses are used. The validation of the requests is done with django forms.
+
+In addition to the typical Django stuff, I added a couple of third-party apps:
+
+**[django-htmx](https://django-htmx.readthedocs.io/en/latest/)**
+
+
++ request.htmx (__bool__)
+
+it provides a way to differentiate requests made on htmx, in which case I can respond with a partial instead of a complete page.
+
++ django_htmx.http.retarget  
++ django_htmx.http.HttpResponseLocation
+
+I use them in the home view because in this case I want to render the entire page. to show things like the name of the user who has logged in.
+
+**[django-widget-tweaks](https://pypi.org/project/django-widget-tweaks/)**
+
+I used it and it has a way to put the CSS classes directly into the HTML. This is important because I needed tailwindcss to be able to access these classes during development.
+
+### **[Alpinejs](https://alpinejs.dev/)**
+
++ x-data
+
+provides a way to relate data to HTML elements that have a local scope, being available only within the element in which they are defined. the library parses the html content upon startup on the client. This gives some freedom when creating the html, for example:
+
+in
+``` 
+->  templates/progress/project_detail.html 
+```
+
+there are two sections in both of which I define a series of local variables
+
+``` javascript
+x-data="{Modalvisible:false, noteCount: {{note_count}}, editing:false}"
+```
+
+These variables are used to maintain the note count and adjust the visibility of a modal. Because the behavior of modal and count variables is very similar, I defined such a section in another html document that I added to both sections via the tag {% include %}
+
+Within that document I can manage the defined variables and although it is a single document, the locality of the definition will mean that they are different variables in the client.
+
++ Alpine.store
+
+esto me permite almacenar objetos incluyendo metodos que pueden ser accedidos o ejecutados por scripts alpine de alcanse local.
+lo use principalmente para establecer que seccion estaba activa de la barra de navegacion. puede ver su uso en:
+
+->  progress/static/progress/js/alpinestore.js
+->  progress/templates/progress/snippets/btn_section.html
+
+### **[HTMX](https://htmx.org/docs/)**
+
+most of this project uses htmx as a way to send request and receive responses. From that I would like to highlight the use of verbs that in some cases is essential to determine how to handle the server-side response, such as the edit Note form that is in notelist_modal:
+
+```html
+<form x-show="editing"
+    @set-editing-false="editing = false" 
+    . . .                    
+
+{% if project_notes %}
+    . . .
+    hx-put="{% url 'progress:create_project_note' object.id %}"
+{% else %}
+    . . .
+    hx-put="{% url 'progress:create_task_note' object.id %}"
+{% endif %}
+
+    class="form-edit-notes w-full relative"> . . . </form>
+```
+Another very interesting thing is the way in which an action can be executed after triggering an event with htmx. In the case of this project I integrated [SweetAlert](https://sweetalert2.github.io/#usage) alerts with certain htmx requests, you can see the code in:
+
+```
+->  progress/static/progress/js/alpinestore.js
+```
+
+- - -
+## Collaborations
+
+I did this project alone, but it is totally open to collaborations, improvements and modifications. The only conditions are to maintain the technology stack.
