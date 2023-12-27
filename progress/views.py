@@ -86,8 +86,9 @@ def project_detail(request, project_id):
     if project.public:
         pass
     else: 
-        if not request.user.is_authenticated or request.user != project.user:
-            return HttpResponseForbidden
+        # check if the user has permition to this project
+        if not project.users.filter(id=request.user.id).exists():
+            return HttpResponseForbidden()
         
     response = render(request, 'progress/project_detail.html', {'project':project, 'active_section':''})
     

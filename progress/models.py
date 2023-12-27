@@ -29,7 +29,8 @@ class Project(models.Model):
     importance = models.IntegerField(choices=Importance.choices, default=Importance.NORMAL)
     status = models.IntegerField(choices=Status.choices, default=Status.IDEA)
     image = models.FileField(upload_to='projects', null=True, blank=True)
-    users = models.ManyToManyField(User, related_name="projects" , null=True)
+    users = models.ManyToManyField(User, related_name="projects" , null=True, blank=True) 
+    url = models.URLField(blank=True, null=True)
 
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
