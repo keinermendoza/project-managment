@@ -28,6 +28,7 @@ def project_view(obj):
 
 class ProjectNoteAdmin(admin.StackedInline):
     """for see the projectNote form inside the ProjectAdmin"""
+    readonly_fields = ["user"]
 
     model = ProjectNote
     extra = 1 
@@ -35,7 +36,8 @@ class ProjectNoteAdmin(admin.StackedInline):
 class TaskStackedAdmin(admin.StackedInline):
     """for see the task form inside the ProjectAdmin"""
     # form = TaskFormForProjectAdmin
-    readonly_fields = [espected_finish]
+    readonly_fields = ["created", "started", "completed", espected_finish]
+
     model = Task
     extra = 1
 
@@ -82,3 +84,14 @@ class ProjectAdmin(admin.ModelAdmin):
     filter_horizontal = ['users']
     search_fields = ['name', 'description']
     inlines = [ProjectNoteAdmin, TaskStackedAdmin]
+
+
+    def save_formset(self, request, form, formset, change):
+        instances = formset.save(commit=False)
+        for obj in formset.deleted_objects:
+            obj.delete()
+        for instance in instances:
+            if not instance.id:
+                instance.user = request.user
+            instance.save()
+    

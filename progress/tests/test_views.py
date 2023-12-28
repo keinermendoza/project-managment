@@ -1,9 +1,8 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from account.models import User
-from progress.models import Project, Task
-from progress.views import project_detail, projects_all\
-, projects_private, projects_public, admin_project_view
+from progress.models import Project
+
 
 class TestProjectViews(TestCase):
     def setUp(self):
@@ -35,27 +34,33 @@ class TestProjectViews(TestCase):
 
         # creating projects
         data_public_project_1 = {
-            'user': self.user_one,
+            # 'user': self.user_one,
             'name': 'public project',
             'description': 'description of my test project',
         }
 
         data_private_project_1 = {
-            'user': self.user_one,
+            # 'user': self.user_one,
             'public': False,
             'name': 'public project',
             'description': 'description of my test project',
         }
 
         data_private_project_2 = {
-            'user': self.user_two,
+            # 'user': self.user_two,
             'public': False,
             'name': 'public project',
             'description': 'description of my test project',
         }
         self.public_project_1 = Project.objects.create(**data_public_project_1)
+        self.public_project_1.users.set([self.user_one])
+
         self.private_project_1 = Project.objects.create(**data_private_project_1)
+        self.private_project_1.users.set([self.user_one])
+
         self.private_project_2 = Project.objects.create(**data_private_project_2)
+        self.private_project_2.users.set([self.user_two])
+
 
         self.routes = {
             'home': reverse('progress:projects_home'),
@@ -241,7 +246,7 @@ class TestProjectViews(TestCase):
         self.client.force_login(self.user_one)
         response = self.client.get(self.routes['detail_private_2'])
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 403)
 
         # user two is the owner
         self.client.force_login(self.user_two)
@@ -249,34 +254,4 @@ class TestProjectViews(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.private_project_2, response.context['project'])
-
-
-    # def test_user_anonimous_get_projects_public_using_HTMX(self):
-    #     """anonimous user can requests the projects_public view
-    #     response contains only the public projects
-    #     the response is a partial html"""
-        
-    #     response = self.client.get(self.routes['public'], **self.use_HTMX)
-        
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'progress/snippets/project_list.html')
-    #     self.assertNotIn('progress/base.html', response.templates)
-
-    #     self.assertIn(self.public_project_1, response.context['projects'])
-    #     self.assertNotIn(self.private_project_1, response.context['projects'])
-
-    # def test_user_anonimous_get_projects_public_using_HTMX(self):
-    #     """anonimous user can requests the projects_public view
-    #     response contains only the public projects
-    #     the response is a partial html"""
-        
-    #     response = self.client.get(self.routes['public'], **self.use_HTMX)
-        
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertTemplateUsed(response, 'progress/snippets/project_list.html')
-    #     self.assertNotIn('progress/base.html', response.templates)
-
-    #     self.assertIn(self.public_project_1, response.context['projects'])
-    #     self.assertNotIn(self.private_project_1, response.context['projects'])
-
 

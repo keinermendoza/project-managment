@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse, resolve
-from progress.views import home, projects_all, project_detail\
+from progress.views import projects_home, projects_all, project_detail\
 , projects_private, projects_public, admin_project_view
 
 class TestProgressUrls(TestCase):
@@ -8,7 +8,7 @@ class TestProgressUrls(TestCase):
     
     def test_home_url(self):
         url = reverse('progress:projects_home')
-        self.assertEquals(resolve(url).func, home)
+        self.assertEquals(resolve(url).func, projects_home)
 
     def test_projects_all_url(self):
         url = reverse('progress:projects_all')
