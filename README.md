@@ -1,7 +1,7 @@
 # Progress Managment
 This is a management tool, focused on communicating project progress and receiving feedback.
 
-![this project](readme_src/managment.webp)
+![this project](https://github.com/keinermendoza/project-managment/assets/75821986/651f1986-0107-49b3-b2bd-f027b0e1851f)
 
 ## **Admin**
 
@@ -21,7 +21,7 @@ Tasks have an estimated completion period that must be declared when created. Wh
 <details>
   <summary> 📽️ See Demo</summary>
 
-![automatic calculation time for finish task](readme_src/task_state.gif)
+![automatic calculation time for finish task](https://github.com/keinermendoza/project-managment/assets/75821986/db749ab1-3af3-4eb3-ac97-a2909aea46b9)
 
 </details>
 <br>
@@ -39,8 +39,8 @@ When creating a note from the admin it is not necessary to mark the user, the cu
 
 <details>
   <summary> 📽️ See Demo</summary>
-
-![auto save user for admin notes](readme_src/admin_notes.gif)
+  
+![auto save user for admin notes](https://github.com/keinermendoza/project-managment/assets/75821986/7e6e9703-d6ba-4c16-8007-3a2de480c972)
 
 </details>
 <br>
@@ -54,7 +54,7 @@ I added a custom view to the admin that allows you to view the project informati
 <details>
   <summary> 📽️ See Demo</summary>
 
-![custom admin view](readme_src/custom_admin_view.gif)
+![custom_admin_view](https://github.com/keinermendoza/project-managment/assets/75821986/03cc173e-0069-4a4b-adee-fd35446759c8)
 
 </details>
 <br>
@@ -114,7 +114,7 @@ These variables are used to maintain the note count and adjust the visibility of
 <details>
   <summary> 📽️ See Demo update counter</summary>
 
-![update note counter](readme_src/update_counter.gif)
+![update_counter](https://github.com/keinermendoza/project-managment/assets/75821986/6595ceef-b333-4733-88ac-d39a57971951)
 
 </details>
 <br>
