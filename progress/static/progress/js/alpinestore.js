@@ -1,3 +1,4 @@
+// SECTION BUTTONS 
 document.addEventListener('alpine:init', () => {
     Alpine.store('section', {
         
@@ -19,27 +20,23 @@ document.addEventListener('alpine:init', () => {
             this.activeSection = this.activeSection.map(section => ({...section, isActive: false}))
         }
     
-    }),
+}),
 
-    Alpine.store('notes', {
-        editProccess(noteId, noteMessage) {
-            Array.from(document.getElementsByClassName('form-edit-notes')).forEach(form => {
-                
-                // update form data
-                form.note.value = noteMessage;
-                form.noteId.value = noteId;
-               
-            })
+// PASSING DATA TO EDIT NOTE FORM
+Alpine.store('notes', {
+    editProccess(noteId, noteMessage) {
+        Array.from(document.getElementsByClassName('form-edit-notes')).forEach(form => {
             
-        }
-        
-    
+            // update form data
+            form.note.value = noteMessage;
+            form.noteId.value = noteId;
+            
+        })}
     })
-  })
+})
 
-
+// DELETING NOTE
 document.addEventListener("htmx:confirm", function(e) {
-    // if deleting a note
     if (Array.from(e.target.classList).includes('delete-note'))  { 
         e.preventDefault()
   
@@ -56,25 +53,54 @@ document.addEventListener("htmx:confirm", function(e) {
         } 
       });
     }
-  });
+});
 
+// CREATING NOTE
 // https://www.reddit.com/r/htmx/comments/10hu6wp/how_to_know_which_event_was_triggered/
 htmx.on("htmx:afterRequest", (e) => {
-// if creating a Note 
-if (Array.from(e.target.classList).includes("form-notes")) {
-    if (e.detail.successful) {
-        e.target.note.value = ''
-        const event = new CustomEvent("upp-note-counter");
-        e.target.dispatchEvent(event)
+    if (Array.from(e.target.classList).includes("form-notes")) {
+        if (e.detail.successful) {
+            e.target.note.value = ''
+            const event = new CustomEvent("upp-note-counter");
+            e.target.dispatchEvent(event)
 
-        Swal.fire({
-            icon: "success",
-            title: "Note Created",
-            showConfirmButton: false,
-            timer: 1500
-          });
+            Swal.fire({
+                icon: "success",
+                title: "Note Created",
+                showConfirmButton: false,
+                timer: 1500
+            });
 
-    } else {
+        } else {
+
+            console.log(e)
+            console.log(e.target)
+
+            Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: e.detail.xhr.responseText,
+                showConfirmButton: false,
+                timer: 2500
+            });
+
+        }
+    } 
+    // EDITING NOTE
+    else if (Array.from(e.target.classList).includes("form-edit-notes")) {
+        if (e.detail.successful) {
+            e.target.note.value = ''
+            const event = new CustomEvent("set-editing-false");
+            e.target.dispatchEvent(event)
+
+            Swal.fire({
+                icon: "success",
+                title: "Note Updated",
+                showConfirmButton: false,
+                timer: 1500
+            });
+
+        } else {
 
         console.log(e)
         console.log(e.target)
@@ -87,36 +113,10 @@ if (Array.from(e.target.classList).includes("form-notes")) {
             timer: 2500
           });
 
-    }
-} 
-// if editing a Note
-else if (Array.from(e.target.classList).includes("form-edit-notes")) {
-    if (e.detail.successful) {
-        e.target.note.value = ''
-        const event = new CustomEvent("set-editing-false");
-        e.target.dispatchEvent(event)
-
-        Swal.fire({
-            icon: "success",
-            title: "Note Updated",
-            showConfirmButton: false,
-            timer: 1500
-          });
-
-    } else {
-
-        console.log(e)
-        console.log(e.target)
-
-        Swal.fire({
-            icon: "error",
-            title: "Oops...",
-            text: e.detail.xhr.responseText,
-            showConfirmButton: false,
-            timer: 2500
-          });
-
-    }
-} 
-
+        }
+    } 
 });
+
+document.addEventListener("privated_project_added", () => {
+    alert("listo")
+})

@@ -5,7 +5,7 @@ from .forms import LoginForm, RegisterForm
 from django.contrib.auth import authenticate, login, logout
 from django_htmx.http import retarget, HttpResponseLocation
 from .models import User
-
+from progress.models import Project
 def login_view(request):
 
     if request.method == "GET":
@@ -53,14 +53,19 @@ def register_view(request):
             if User.objects.filter(email=cd["email"]).exists():
                 form.add_error("email", "Sorry. There is a user registred with this email")
 
+            elif User.objects.filter(username=cd["username"]).exists():
+                form.add_error("username", "Sorry. There is a user registred with this name")
+
             else:
                 user = User.objects.create_user(email=cd["email"], password=cd["password"], username=cd["username"])   
                 login(request, user)
 
-                # trigering a boosted redirect
+                ## this two lines are for give access to the model that represent the current project
+                project = Project.objects.get(name="Managment")
+                user.projects.add(project)
 
-                # return HttpResponseLocation(reverse('progress:projects_home'), target="#main")
                 return redirect(reverse('progress:projects_home'))
+                
             
         response = render(request, "account/partials/register.html", {"form":form})
         return retarget(response, "#main")

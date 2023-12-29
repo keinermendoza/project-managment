@@ -24,6 +24,8 @@ Tasks have an estimated completion period that must be declared when created. Wh
 ![automatic calculation time for finish task](readme_src/task_state.gif)
 
 </details>
+<br>
+
 
 ### **Project Privacy**
 
@@ -41,6 +43,7 @@ When creating a note from the admin it is not necessary to mark the user, the cu
 ![auto save user for admin notes](readme_src/admin_notes.gif)
 
 </details>
+<br>
 
 ### **Views**
 
@@ -54,6 +57,7 @@ I added a custom view to the admin that allows you to view the project informati
 ![custom admin view](readme_src/custom_admin_view.gif)
 
 </details>
+<br>
 
 
 ## **Technology Stack**
@@ -113,6 +117,7 @@ These variables are used to maintain the note count and adjust the visibility of
 ![update note counter](readme_src/update_counter.gif)
 
 </details>
+<br>
 
 Within that document I can manage the defined variables and although it is a single document, the locality of the definition will mean that they are different variables in the client.
 
@@ -133,6 +138,7 @@ I mainly used it to establish which section of the navigation bar was active. Yo
 ![custom admin view](readme_src/alpine.gif)
 
 </details>
+<br>
 
 ### **[HTMX](https://htmx.org/docs/)**
 
